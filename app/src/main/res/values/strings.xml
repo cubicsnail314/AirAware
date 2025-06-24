@@ -1,0 +1,11 @@
+    <resources>
+        <string name="app_name">My Application</string>
+        <string name="ort_hinzufuegen">Ort hinzufügen</string>
+        <string name="naechsten_standort_hinzufuegen">Nächsten Standort hinzufügen</string>
+        <string name="cd_search">Suche</string>
+        <string name="cd_settings">Suche</string>
+        <string name="cd_location">Suche</string>
+        <string name="cd_notifications">Suche</string>
+        <string name="title_search">Search</string>
+        <string name="cd_delete">Search</string>
+    </resources>

@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- your “Löschen” delete icon -->
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/delete"
+        android:title="@string/cd_delete"
+        app:showAsAction="ifRoom"/>
+
+
+</menu>
