@@ -38,8 +38,26 @@ public class MainActivity extends AppCompatActivity {
         btnSettings.setOnClickListener(v -> {
             // TODO: Profil anzeigen
         });
+        
         btnAddNearestLocation.setOnClickListener(v -> {
-            // TODO: Nächsten Ort hinzufügen
+
+            // In your MainActivity or wherever you call getAirQuality:
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // This runs in a background thread
+                    int result = AirQuality.getAirQuality(47.076668, 15.421371);
+                    System.out.println(result);
+                    // If you need to update the UI, use runOnUiThread:
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update your UI here with 'result'
+                        }
+                    });
+                }
+            }).start();
+            
         });
     }
 }
