@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.Intent;             // ← add this
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -55,33 +54,45 @@ public class MainActivity extends AppCompatActivity {
         btnAddNearestLocation.setOnClickListener(v -> {
 
             // In your MainActivity or wherever you call getAirQuality:
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        // Permission is not granted, request it
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                REQUEST_LOCATION_PERMISSION);
-                    } else {
-                    // Permission already granted, proceed with location logic
-                    getNearestLocation();
-                    }
-                    // This runs in a background thread
-                    int result = AirQuality.getAirQuality(47.076668, 15.421371);
-                    System.out.println(result);
-                    // If you need to update the UI, use runOnUiThread:
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Update your UI here with 'result'
-                        }
-                    });
-                }
-            }).start();
+            getPermission();
 
         });
+    }
+
+    private void getPermission() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Permission is not granted, request it
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            REQUEST_LOCATION_PERMISSION);
+                } else {
+                    // Permission already granted, proceed with location logic
+                    getNearestLocation();
+                }
+            }
+        }).start();
+    }
+
+    private void getAirQualityForNearestLocation(final double lat, final double lon) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // This runs in a background thread
+                int result = AirQuality.getAirQuality(lat, lon);
+                System.out.println(result);
+                // If you need to update the UI, use runOnUiThread:
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Update your UI here with 'result'
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override
@@ -110,12 +121,18 @@ public class MainActivity extends AppCompatActivity {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
                 Toast.makeText(MainActivity.this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_LONG).show();
+                getAirQualityForNearestLocation(latitude, longitude);
                 // You can use latitude and longitude here as needed
             }
+
             @Override
-            public void onStatusChanged(String provider, int status, android.os.Bundle extras) {}
+            public void onStatusChanged(String provider, int status, android.os.Bundle extras) {
+            }
+
             @Override
-            public void onProviderEnabled(String provider) {}
+            public void onProviderEnabled(String provider) {
+            }
+
             @Override
             public void onProviderDisabled(String provider) {
                 Toast.makeText(MainActivity.this, "Please enable GPS", Toast.LENGTH_SHORT).show();
