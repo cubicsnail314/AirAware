@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@android:color/white">
 
     <!-- Obere Reihe mit drei Icon-Buttons -->
     <LinearLayout
@@ -11,66 +12,71 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_search"
-            style="?attr/materialIconButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
             android:contentDescription="@string/cd_search"
             app:icon="@drawable/search"
-            app:iconTint="?attr/colorOnSurface"
-            android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:iconSize="28dp"
+            app:iconTint="@android:color/black"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
             app:iconPadding="0dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_notifications"
-            style="?attr/materialIconButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
             android:contentDescription="@string/cd_notifications"
             app:icon="@drawable/notifications"
-            app:iconTint="?attr/colorOnSurface"
-            android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:iconSize="30dp"
+            app:iconTint="@android:color/black"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
             app:iconPadding="0dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_settings"
-            style="?attr/materialIconButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:contentDescription="@string/cd_settings"
             app:icon="@drawable/settings"
-            app:iconTint="?attr/colorOnSurface"
-            android:background="?selectableItemBackgroundBorderless"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:iconSize="30dp"
+            app:iconTint="@android:color/black"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
             app:iconPadding="0dp" />
     </LinearLayout>
 
     <!-- Erster großer Button -->
+
+    <!-- Zweiter großer Button -->
+
     <Button
         android:id="@+id/btn_add_location"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="300dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#E3F2FD"
         android:padding="24dp"
         android:text="@string/ort_hinzufuegen"
-        app:layout_constraintTop_toBottomOf="@id/top_buttons"
+        android:textColor="@android:color/black"
+        app:cornerRadius="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/top_buttons"
+        app:strokeColor="#2196F3"
+        app:strokeWidth="2dp" />
 
-    <!-- Zweiter großer Button -->
     <Button
         android:id="@+id/btn_add_nearest_Location"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -79,6 +85,11 @@
         android:layout_marginTop="16dp"
         android:padding="24dp"
         android:text="@string/naechsten_standort_hinzufuegen"
+        android:textColor="@android:color/black"
+        android:backgroundTint="#E3F2FD"
+        app:cornerRadius="16dp"
+        app:strokeColor="#2196F3"
+        app:strokeWidth="2dp"
         app:layout_constraintTop_toBottomOf="@id/btn_add_location"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

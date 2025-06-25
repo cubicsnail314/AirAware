@@ -48,14 +48,13 @@ public class MainActivity extends AppCompatActivity {
             // TODO: Benachrichtigungen anzeigen
         });
         btnSettings.setOnClickListener(v -> {
-            // TODO: Profil anzeigen
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
         });
 
         btnAddNearestLocation.setOnClickListener(v -> {
-
-            // In your MainActivity or wherever you call getAirQuality:
+            // Get current location and air quality
             getPermission();
-
         });
     }
 
@@ -82,13 +81,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // This runs in a background thread
-                int result = AirQuality.getAirQuality(lat, lon);
-                System.out.println(result);
+                AirQualityResult result = AirQuality.getAirQualityWithDetails(lat, lon);
+                System.out.println("Location-based AQI: " + result.aqi + ", City: " + result.city + ", Country: " + result.country);
+                
                 // If you need to update the UI, use runOnUiThread:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Update your UI here with 'result'
+                        // Display air quality information
+                        String message = "City: " + result.city + 
+                                       "\nCountry: " + result.country + 
+                                       "\nAir Quality Index: " + result.aqi;
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -111,32 +115,85 @@ public class MainActivity extends AppCompatActivity {
 
     private void getNearestLocation() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        
+        // Check permission before accessing location services
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show();
             return;
         }
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                Toast.makeText(MainActivity.this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_LONG).show();
-                getAirQualityForNearestLocation(latitude, longitude);
-                // You can use latitude and longitude here as needed
-            }
+        
+        // Try network location first (faster), then GPS
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            System.out.println("Trying Network provider for faster location...");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "Getting network location...", Toast.LENGTH_SHORT).show();
+                }
+            });
+            requestLocation(locationManager, LocationManager.NETWORK_PROVIDER);
+        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            System.out.println("Trying GPS provider...");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "Getting GPS location...", Toast.LENGTH_SHORT).show();
+                }
+            });
+            requestLocation(locationManager, LocationManager.GPS_PROVIDER);
+        } else {
+            Toast.makeText(this, "No location providers available", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void requestLocation(LocationManager locationManager, String provider) {
+        // Check permission before requesting location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        try {
+            locationManager.requestSingleUpdate(provider, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    System.out.println("Location received from " + provider + ": Lat=" + latitude + ", Lon=" + longitude);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    getAirQualityForNearestLocation(latitude, longitude);
+                }
 
-            @Override
-            public void onStatusChanged(String provider, int status, android.os.Bundle extras) {
-            }
+                @Override
+                public void onStatusChanged(String provider, int status, android.os.Bundle extras) {
+                    System.out.println("Location Status changed for " + provider + ": " + status);
+                }
 
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
+                @Override
+                public void onProviderEnabled(String provider) {
+                    System.out.println("Location Provider enabled: " + provider);
+                }
 
-            @Override
-            public void onProviderDisabled(String provider) {
-                Toast.makeText(MainActivity.this, "Please enable GPS", Toast.LENGTH_SHORT).show();
-            }
-        }, Looper.getMainLooper());
+                @Override
+                public void onProviderDisabled(String provider) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Location provider disabled", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }, Looper.getMainLooper());
+        } catch (SecurityException e) {
+            System.out.println("SecurityException when requesting location: " + e.getMessage());
+            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+        }
     }
 }
