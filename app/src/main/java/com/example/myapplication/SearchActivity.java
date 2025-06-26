@@ -80,11 +80,11 @@ public class SearchActivity extends AppCompatActivity {
         }
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            String result = searchResults.get(position).stationName;
+            StationSearchResult searchResult = searchResults.get(position);
+            String result = searchResult.stationName;
             holder.textView.setText(result);
             holder.textView.setOnClickListener(v -> {
-                Toast.makeText(SearchActivity.this, "Selected: " + result, Toast.LENGTH_SHORT).show();
-                // TODO: handle selection (e.g., return result, open details, etc.)
+                AirQualityResult airQualityResult = AirQualityAPI.getAirQualityWithDetails(searchResult.latitude, searchResult.longitude);
             });
         }
         @Override
