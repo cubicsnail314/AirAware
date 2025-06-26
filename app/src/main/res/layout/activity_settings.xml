@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        app:title="Einstellungen"
+        app:titleTextColor="@android:color/black" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Benutzereinstellungen -->
+            <TextView
+                android:text="Benutzereinstellungen"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:text="AQI-Index" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="US AQI*" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Einheit" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="km/m, °C, mbar" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Sprache" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Systemberechtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+            </LinearLayout>
+
+            <!-- Anzeigen -->
+            <TextView
+                android:text="Anzeigen"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="4dp" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:text="Widget-Trübung" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Pollen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="An" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+            </LinearLayout>
+
+            <!-- Benachrichtigungen -->
+            <TextView
+                android:text="Benachrichtigungen"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="4dp" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:text="Smart-Benachrichtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Täglicher Bericht" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Grenzwertmeldungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="Für Standorte aktiviert: Nein\nFür Geräte aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+                <TextView android:text="Benachrichtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
+            </LinearLayout>
+
+            <!-- Unterstützen -->
+            <TextView
+                android:text="Unterstützen"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="4dp" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+            <TextView android:text="Hilfe" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+
+            <!-- Über IQAir -->
+            <TextView
+                android:text="Über IQAir"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="4dp" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+            <TextView android:text="Über diese App" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+            <TextView android:text="Nutzungsbedingungen &amp; Datenschutzerklärung" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
+
+            <!-- Feedback Button -->
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Geben Sie uns Feedback"
+                android:backgroundTint="#E3F2FD"
+                android:textColor="#2196F3"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout> 

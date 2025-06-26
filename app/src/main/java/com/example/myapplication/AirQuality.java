@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 
 public class AirQuality {
     private static final String API_TOKEN = "a216862100a39d6530de9a623889e273588fab3f";
@@ -91,6 +92,7 @@ public class AirQuality {
             // Get city information from the API's city object
             String city = "Unknown";
             String country = "Unknown";
+            String stationName = "Unknown";
             
             JsonObject cityObj = data.getAsJsonObject("city");
             if (cityObj != null) {
@@ -104,13 +106,13 @@ public class AirQuality {
                 
                 // Check if the API provides city name directly
                 if (cityObj.has("name")) {
-                    String fullCityName = cityObj.get("name").getAsString();
-                    System.out.println("Full city name from API: " + fullCityName);
+                    stationName = cityObj.get("name").getAsString();
+                    System.out.println("Full city name from API: " + stationName);
                     
                     // Check if the name contains street-level information
-                    if (fullCityName.contains("gasse") || fullCityName.contains("straße") || 
-                        fullCityName.contains("street") || fullCityName.contains("avenue") ||
-                        fullCityName.contains("gegenüber") || fullCityName.contains("opposite")) {
+                    if (stationName.contains("gasse") || stationName.contains("straße") || 
+                        stationName.contains("street") || stationName.contains("avenue") ||
+                        stationName.contains("gegenüber") || stationName.contains("opposite")) {
                         
                         System.out.println("Detected street-level information, checking URL...");
                         
@@ -158,7 +160,7 @@ public class AirQuality {
                         } else {
                             System.out.println("No URL available, using fallback parsing");
                             // Fallback: try to extract from the name field
-                            String[] parts = fullCityName.split(",");
+                            String[] parts = stationName.split(",");
                             if (parts.length >= 2) {
                                 country = parts[parts.length - 1].trim();
                                 
@@ -168,13 +170,13 @@ public class AirQuality {
                                     city = parts[0].trim();
                                 }
                             } else {
-                                city = fullCityName;
+                                city = stationName;
                             }
                         }
                     } else {
                         System.out.println("No street-level information detected, using normal parsing");
                         // The name doesn't contain street terms, use normal parsing
-                        String[] parts = fullCityName.split(",");
+                        String[] parts = stationName.split(",");
                         if (parts.length >= 2) {
                             country = parts[parts.length - 1].trim();
                             
@@ -184,7 +186,7 @@ public class AirQuality {
                                 city = parts[0].trim();
                             }
                         } else {
-                            city = fullCityName;
+                            city = stationName;
                         }
                     }
                 }
@@ -207,7 +209,39 @@ public class AirQuality {
             System.out.println("Extracted city: " + city);
             System.out.println("Extracted country: " + country);
 
-            return new AirQualityResult(aqi, city, country);
+            // Extract forecast for next 3 days (pm10 AQI)
+            String[] forecastDates = new String[3];
+            int[] forecastAqi = new int[3];
+            if (data.has("forecast")) {
+                JsonObject forecast = data.getAsJsonObject("forecast");
+                if (forecast.has("daily")) {
+                    JsonObject daily = forecast.getAsJsonObject("daily");
+                    if (daily.has("pm10")) {
+                        // Get today's date to filter out today from forecast
+                        Calendar today = Calendar.getInstance();
+                        String todayStr = String.format("%04d-%02d-%02d", 
+                            today.get(Calendar.YEAR), 
+                            today.get(Calendar.MONTH) + 1, 
+                            today.get(Calendar.DAY_OF_MONTH));
+                        
+                        int i = 0;
+                        for (JsonElement elem : daily.getAsJsonArray("pm10")) {
+                            if (i >= 3) break;
+                            JsonObject day = elem.getAsJsonObject();
+                            String forecastDate = day.get("day").getAsString();
+                            
+                            // Skip today's date and only include future dates
+                            if (!forecastDate.equals(todayStr)) {
+                                forecastDates[i] = forecastDate;
+                                forecastAqi[i] = day.get("avg").getAsInt();
+                                i++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new AirQualityResult(aqi, city, country, stationName, forecastDates, forecastAqi);
 
         } catch (Exception e) {
             e.printStackTrace();

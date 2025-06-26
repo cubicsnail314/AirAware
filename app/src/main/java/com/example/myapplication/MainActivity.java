@@ -10,14 +10,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Looper;
-
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.google.android.material.button.MaterialButton;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
+import com.google.android.material.button.MaterialButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -84,15 +81,17 @@ public class MainActivity extends AppCompatActivity {
                 AirQualityResult result = AirQuality.getAirQualityWithDetails(lat, lon);
                 System.out.println("Location-based AQI: " + result.aqi + ", City: " + result.city + ", Country: " + result.country);
                 
-                // If you need to update the UI, use runOnUiThread:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Display air quality information
-                        String message = "City: " + result.city + 
-                                       "\nCountry: " + result.country + 
-                                       "\nAir Quality Index: " + result.aqi;
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
+                        intent.putExtra("city", result.city);
+                        intent.putExtra("country", result.country);
+                        intent.putExtra("stationName", result.stationName);
+                        intent.putExtra("aqi", result.aqi);
+                        intent.putExtra("forecastDates", result.forecastDates);
+                        intent.putExtra("forecastAqi", result.forecastAqi);
+                        startActivity(intent);
                     }
                 });
             }
@@ -119,31 +118,21 @@ public class MainActivity extends AppCompatActivity {
         // Check permission before accessing location services
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Location permission not granted", Toast.LENGTH_SHORT).show());
             return;
         }
         
         // Try network location first (faster), then GPS
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             System.out.println("Trying Network provider for faster location...");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Getting network location...", Toast.LENGTH_SHORT).show();
-                }
-            });
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Getting network location...", Toast.LENGTH_SHORT).show());
             requestLocation(locationManager, LocationManager.NETWORK_PROVIDER);
         } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             System.out.println("Trying GPS provider...");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Getting GPS location...", Toast.LENGTH_SHORT).show();
-                }
-            });
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Getting GPS location...", Toast.LENGTH_SHORT).show());
             requestLocation(locationManager, LocationManager.GPS_PROVIDER);
         } else {
-            Toast.makeText(this, "No location providers available", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, "No location providers available", Toast.LENGTH_SHORT).show());
         }
     }
     

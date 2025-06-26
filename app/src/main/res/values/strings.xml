@@ -8,4 +8,6 @@
         <string name="cd_notifications">Suche</string>
         <string name="title_search">Search</string>
         <string name="cd_delete">Search</string>
+        <string name="cd_edit">Edit</string>
+        <string name="cd_add">Add</string>
     </resources>
