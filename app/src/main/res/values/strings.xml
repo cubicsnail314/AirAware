@@ -10,4 +10,5 @@
         <string name="cd_delete">Search</string>
         <string name="cd_edit">Edit</string>
         <string name="cd_add">Add</string>
+        <string name="cd_pin">Pin</string>
     </resources>

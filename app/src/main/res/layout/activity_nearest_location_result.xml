@@ -6,76 +6,17 @@
     android:padding="16dp"
     android:background="@android:color/white">
 
-    <!-- Top row with three icon buttons -->
-    <LinearLayout
-        android:id="@+id/top_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_search"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="@string/cd_search"
-            app:icon="@drawable/search"
-            app:iconTint="@android:color/black"
-            app:iconSize="24dp"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_notifications"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="@string/cd_notifications"
-            app:icon="@drawable/notifications"
-            app:iconTint="@android:color/black"
-            app:iconSize="24dp"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_settings"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:contentDescription="@string/cd_settings"
-            app:icon="@drawable/settings"
-            app:iconTint="@android:color/black"
-            app:iconSize="24dp"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp" />
-    </LinearLayout>
-
-    <!-- Top right icon buttons: Edit and Plus -->
+    <!-- Top right icon button: Plus only -->
     <LinearLayout
         android:id="@+id/top_right_icons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        app:layout_constraintTop_toBottomOf="@id/top_buttons"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp">
-
-        <ImageButton
-            android:id="@+id/btn_edit"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/edit"
-            android:contentDescription="@string/cd_edit"
-            android:padding="8dp"
-            android:scaleType="centerInside" />
 
         <ImageButton
             android:id="@+id/btn_plus"

@@ -50,16 +50,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
             setupForecast(forecastDates, forecastAqi);
         }
 
-        // Set up top button listeners
-        findViewById(R.id.btn_search).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(this, SearchActivity.class));
-        });
-        findViewById(R.id.btn_settings).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(this, SettingsActivity.class));
-        });
-        findViewById(R.id.btn_notifications).setOnClickListener(v -> {
-            android.widget.Toast.makeText(this, "TODO: Benachrichtigungen anzeigen", android.widget.Toast.LENGTH_SHORT).show();
-        });
+        // Set up button listener
         findViewById(R.id.btn_plus).setOnClickListener(v -> {
             startActivity(new android.content.Intent(this, SearchActivity.class));
         });

@@ -6,7 +6,7 @@
     android:padding="16dp"
     android:background="@android:color/white">
 
-    <!-- Obere Reihe mit drei Icon-Buttons -->
+    <!-- Obere Reihe mit vier Icon-Buttons -->
     <LinearLayout
         android:id="@+id/top_buttons"
         android:layout_width="wrap_content"
@@ -15,6 +15,19 @@
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_pin"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/cd_pin"
+            app:icon="@drawable/pin"
+            app:iconTint="@android:color/black"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_search"

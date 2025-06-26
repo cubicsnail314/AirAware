@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
 
-    private MaterialButton btnSearch, btnNotifications, btnSettings;
+    private MaterialButton btnSearch, btnNotifications, btnSettings, btnPin;
     private Button btnAddLocation, btnAddNearestLocation;
 
     @Override
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         btnSearch = findViewById(R.id.btn_search);
         btnNotifications = findViewById(R.id.btn_notifications);
         btnSettings = findViewById(R.id.btn_settings);
+        btnPin = findViewById(R.id.btn_pin);
         btnAddLocation = findViewById(R.id.btn_add_location);
         btnAddNearestLocation = findViewById(R.id.btn_add_nearest_Location);
 
@@ -48,14 +49,17 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         });
+        btnPin.setOnClickListener(v -> {
+            getPermissionAndLocation();
+        });
 
         btnAddNearestLocation.setOnClickListener(v -> {
             // Get current location and air quality
-            getPermission();
+            getPermissionAndLocation();
         });
     }
 
-    private void getPermission() {
+    private void getPermissionAndLocation() {
         new Thread(new Runnable() {
             @Override
             public void run() {
