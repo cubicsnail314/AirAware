@@ -15,10 +15,9 @@ import java.util.List;
 public class AirQualityAPI {
     private static final String API_TOKEN = "a216862100a39d6530de9a623889e273588fab3f";
 
-    public static List<String> getStationsFromSearch(String keyword) {
+    public static List<StationSearchResult> getStationsFromSearch(String keyword) {
         String encodedKeyword = keyword.replace(" ", "%20");
         String apiUrl = String.format("https://api.waqi.info/search/?keyword=%s&token=%s", encodedKeyword, API_TOKEN);
-        List<String> stationNames = new ArrayList<>();
         try {
             URL url = new URL(apiUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -47,15 +46,18 @@ public class AirQualityAPI {
             if (!dataElement.isJsonArray() || dataElement.getAsJsonArray().size() == 0) {
                 return List.of();
             }
+            List<StationSearchResult> stationSearchResults = new ArrayList<>();
 
             if (dataElement.isJsonArray()) {
                 for (JsonElement element : dataElement.getAsJsonArray()) {
                     JsonObject stationObj = element.getAsJsonObject().get("station").getAsJsonObject();
                     String stationName = stationObj.get("name").getAsString();
-                    stationNames.add(stationName);
+                    Double longitude = stationObj.get("geo").getAsJsonArray().get(0).getAsDouble();
+                    Double latitude = stationObj.get("geo").getAsJsonArray().get(1).getAsDouble();
+                    stationSearchResults.add(new StationSearchResult(stationName, longitude, latitude));
                 }
             }
-            return stationNames;
+            return stationSearchResults;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -253,16 +255,5 @@ public class AirQualityAPI {
             e.printStackTrace();
             return new AirQualityResult(-1, "Error", "Error");
         }
-    }
-
-    // Test method to check API token with Austrian coordinates
-    public static void testAustrianLocation() {
-        // Vienna, Austria coordinates
-        double viennaLat = 48.2082;
-        double viennaLon = 16.3738;
-
-        System.out.println("Testing API with Vienna coordinates: " + viennaLat + ", " + viennaLon);
-        AirQualityResult result = getAirQualityWithDetails(viennaLat, viennaLon);
-        System.out.println("Vienna result - AQI: " + result.aqi + ", City: " + result.city + ", Country: " + result.country);
     }
 }
