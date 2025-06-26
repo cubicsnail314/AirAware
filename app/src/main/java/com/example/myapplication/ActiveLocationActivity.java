@@ -60,6 +60,9 @@ public class ActiveLocationActivity extends AppCompatActivity {
         findViewById(R.id.btn_notifications).setOnClickListener(v -> {
             android.widget.Toast.makeText(this, "TODO: Benachrichtigungen anzeigen", android.widget.Toast.LENGTH_SHORT).show();
         });
+        findViewById(R.id.btn_plus).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(this, SearchActivity.class));
+        });
     }
 
     private void setAqiColor(TextView textView, int aqi) {

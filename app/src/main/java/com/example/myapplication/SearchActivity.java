@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import com.google.android.material.appbar.MaterialToolbar;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,9 +34,21 @@ public class SearchActivity extends AppCompatActivity {
 
         // 3) Wire up the SearchView
         SearchView searchView = findViewById(R.id.search_view);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override public boolean onQueryTextSubmit(String query) {
-                // TODO: perform your search
+                executor.execute(() -> {
+                    List<String> stationNames = AirQualityAPI.getStationsFromSearch(query);
+                    runOnUiThread(() -> {
+                        if (stationNames != null && stationNames.size() > 1) {
+                            System.out.println(stationNames.get(0));
+                            System.out.println(stationNames.get(1));
+                            stationNames.forEach(System.out::println);
+                        } else {
+                            System.out.println("No stations found");
+                        }
+                    });
+                });
                 return true;
             }
             @Override public boolean onQueryTextChange(String newText) {

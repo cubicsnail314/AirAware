@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // This runs in a background thread
-                AirQualityResult result = AirQuality.getAirQualityWithDetails(lat, lon);
+                AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(lat, lon);
                 System.out.println("Location-based AQI: " + result.aqi + ", City: " + result.city + ", Country: " + result.country);
                 
                 runOnUiThread(new Runnable() {
