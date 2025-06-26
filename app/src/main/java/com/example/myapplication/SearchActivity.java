@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.widget.ImageButton;
 
 public class SearchActivity extends AppCompatActivity {
     private SearchResultAdapter adapter;
@@ -90,13 +91,14 @@ public class SearchActivity extends AppCompatActivity {
             }
             
             holder.tvStationName.setText(cleanStationName);
+            // No click action for plus button yet
             
             holder.itemView.setOnClickListener(v -> {
                 // Navigate to ActiveLocationActivity with the station data
                 ExecutorService clickExecutor = Executors.newSingleThreadExecutor();
                 clickExecutor.execute(() -> {
                     // Get air quality data for this specific station using its coordinates
-                    AirQualityResult airQualityResult = AirQualityAPI.getAirQualityWithDetails(searchResult.longitude, searchResult.latitude);
+                    AirQualityResult airQualityResult = AirQualityAPI.getAirQualityWithDetails(searchResult.latitude, searchResult.longitude);
                     runOnUiThread(() -> {
                         if (airQualityResult != null) {
                             android.content.Intent intent = new android.content.Intent(SearchActivity.this, ActiveLocationActivity.class);
@@ -122,10 +124,12 @@ public class SearchActivity extends AppCompatActivity {
         
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvStationName;
+            ImageButton btnPlus;
             
             ViewHolder(View itemView) {
                 super(itemView);
                 tvStationName = itemView.findViewById(R.id.tv_station_name);
+                btnPlus = itemView.findViewById(R.id.btn_plus);
             }
         }
     }

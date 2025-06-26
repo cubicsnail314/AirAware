@@ -52,8 +52,8 @@ public class AirQualityAPI {
                 for (JsonElement element : dataElement.getAsJsonArray()) {
                     JsonObject stationObj = element.getAsJsonObject().get("station").getAsJsonObject();
                     String stationName = stationObj.get("name").getAsString();
-                    Double longitude = stationObj.get("geo").getAsJsonArray().get(0).getAsDouble();
-                    Double latitude = stationObj.get("geo").getAsJsonArray().get(1).getAsDouble();
+                    Double longitude = stationObj.get("geo").getAsJsonArray().get(1).getAsDouble();
+                    Double latitude = stationObj.get("geo").getAsJsonArray().get(0).getAsDouble();
                     stationSearchResults.add(new StationSearchResult(stationName, longitude, latitude));
                 }
             }
