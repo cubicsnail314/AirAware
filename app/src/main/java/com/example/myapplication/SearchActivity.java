@@ -74,28 +74,58 @@ public class SearchActivity extends AppCompatActivity {
     private class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TextView tv = (TextView) LayoutInflater.from(parent.getContext())
-                    .inflate(android.R.layout.simple_list_item_1, parent, false);
-            return new ViewHolder(tv);
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_search_result, parent, false);
+            return new ViewHolder(view);
         }
+        
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             StationSearchResult searchResult = searchResults.get(position);
-            String result = searchResult.stationName;
-            holder.textView.setText(result);
-            holder.textView.setOnClickListener(v -> {
-                AirQualityResult airQualityResult = AirQualityAPI.getAirQualityWithDetails(searchResult.latitude, searchResult.longitude);
+            
+            // Clean up station name - remove ", Austria" if it exists
+            String cleanStationName = searchResult.stationName;
+            if (cleanStationName != null && cleanStationName.endsWith(", Austria")) {
+                cleanStationName = cleanStationName.substring(0, cleanStationName.length() - 9);
+            }
+            
+            holder.tvStationName.setText(cleanStationName);
+            
+            holder.itemView.setOnClickListener(v -> {
+                // Navigate to ActiveLocationActivity with the station data
+                ExecutorService clickExecutor = Executors.newSingleThreadExecutor();
+                clickExecutor.execute(() -> {
+                    // Get air quality data for this specific station using its coordinates
+                    AirQualityResult airQualityResult = AirQualityAPI.getAirQualityWithDetails(searchResult.longitude, searchResult.latitude);
+                    runOnUiThread(() -> {
+                        if (airQualityResult != null) {
+                            android.content.Intent intent = new android.content.Intent(SearchActivity.this, ActiveLocationActivity.class);
+                            intent.putExtra("city", airQualityResult.city);
+                            intent.putExtra("country", airQualityResult.country);
+                            intent.putExtra("stationName", searchResult.stationName);
+                            intent.putExtra("aqi", airQualityResult.aqi);
+                            intent.putExtra("forecastDates", airQualityResult.forecastDates);
+                            intent.putExtra("forecastAqi", airQualityResult.forecastAqi);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(SearchActivity.this, "No air quality data available for this station", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
             });
         }
+        
         @Override
         public int getItemCount() {
             return searchResults.size();
         }
+        
         class ViewHolder extends RecyclerView.ViewHolder {
-            TextView textView;
-            ViewHolder(TextView itemView) {
+            TextView tvStationName;
+            
+            ViewHolder(View itemView) {
                 super(itemView);
-                textView = itemView;
+                tvStationName = itemView.findViewById(R.id.tv_station_name);
             }
         }
     }
