@@ -11,7 +11,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Looper;
 import android.view.View;
-import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     private MaterialButton btnSearch, btnNotifications, btnSettings, btnPin;
     private Button btnAddLocation, btnAddNearestLocation;
     private RecyclerView recyclerViewLocations;
-    private TextView tvEmptyState;
     private View bigButtonsContainer;
     private SavedLocationsAdapter adapter;
     private ExecutorService executorService;
@@ -57,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         btnAddLocation = findViewById(R.id.btn_add_location);
         btnAddNearestLocation = findViewById(R.id.btn_add_nearest_Location);
         recyclerViewLocations = findViewById(R.id.recycler_view_locations);
-        tvEmptyState = findViewById(R.id.tv_empty_state);
         bigButtonsContainer = findViewById(R.id.big_buttons_container);
 
         // Setup RecyclerView

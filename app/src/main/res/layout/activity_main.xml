@@ -80,20 +80,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Empty state text when no locations -->
-    <TextView
-        android:id="@+id/tv_empty_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Keine gespeicherten Standorte"
-        android:textSize="16sp"
-        android:textColor="@android:color/darker_gray"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/top_buttons"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
     <!-- Big buttons container (shown when no locations) -->
     <LinearLayout
         android:id="@+id/big_buttons_container"
@@ -107,7 +93,7 @@
         <Button
             android:id="@+id/btn_add_location"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
+            android:layout_width="350dp"
             android:layout_height="300dp"
             android:layout_marginTop="20dp"
             android:backgroundTint="#E3F2FD"
@@ -121,7 +107,7 @@
         <Button
             android:id="@+id/btn_add_nearest_Location"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
+            android:layout_width="350dp"
             android:layout_height="300dp"
             android:layout_marginTop="16dp"
             android:padding="24dp"
