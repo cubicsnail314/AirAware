@@ -190,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                     @Override
                     public void run() {
                         Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
+                        intent.putExtra("longitude", lon);
+                        intent.putExtra("latitude", lat);
                         intent.putExtra("city", result.city);
                         intent.putExtra("country", result.country);
                         intent.putExtra("stationName", result.stationName);

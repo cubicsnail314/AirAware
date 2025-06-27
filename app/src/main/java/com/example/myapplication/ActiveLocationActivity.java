@@ -34,13 +34,9 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
         tvCity.setText(city);
         tvCountry.setText(country);
-        
-        // Clean up station name - remove ", Austria" if it exists
+
         String cleanStationName = stationName;
-        if (cleanStationName != null && cleanStationName.endsWith(", Austria")) {
-            cleanStationName = cleanStationName.substring(0, cleanStationName.length() - 9);
-        }
-        final String finalCleanStationName = cleanStationName; // Make it final for lambda
+
         tvStation.setText("Station: " + cleanStationName);
         tvAqi.setText(String.valueOf(aqi));
         tvAqiDescription.setText(getAqiDescription(aqi));
