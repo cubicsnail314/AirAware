@@ -95,38 +95,34 @@ public class SearchActivity extends AppCompatActivity {
             holder.tvStationName.setText(cleanStationName);
             
             // Add click listener for plus button to save station to database
-            holder.btnPlus.setOnTouchListener((v, event) -> {
-                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
-                    // Add immediate feedback
-                    Toast.makeText(SearchActivity.this, "Checking location...", Toast.LENGTH_SHORT).show();
-                    
-                    LocationEntity location = new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude);
-                    ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
-                    dbExecutor.execute(() -> {
-                        try {
-                            // Use the transaction method to check and insert atomically
-                            boolean wasInserted = DatabaseClient.getInstance(SearchActivity.this)
-                                    .getAppDatabase()
-                                    .locationDao()
-                                    .insertIfNotExists(location);
-                            
-                            runOnUiThread(() -> {
-                                if (wasInserted) {
-                                    Toast.makeText(SearchActivity.this, "Location saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(SearchActivity.this, "Location already saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } catch (Exception e) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(SearchActivity.this, "Error saving location", Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    });
-                    dbExecutor.shutdown();
-                    return true; // Consume the event
-                }
-                return false;
+            holder.btnPlus.setOnClickListener(v -> {
+                // Add immediate feedback
+                Toast.makeText(SearchActivity.this, "Checking location...", Toast.LENGTH_SHORT).show();
+                
+                LocationEntity location = new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude);
+                ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
+                dbExecutor.execute(() -> {
+                    try {
+                        // Use the transaction method to check and insert atomically
+                        boolean wasInserted = DatabaseClient.getInstance(SearchActivity.this)
+                                .getAppDatabase()
+                                .locationDao()
+                                .insertIfNotExists(location);
+                        
+                        runOnUiThread(() -> {
+                            if (wasInserted) {
+                                Toast.makeText(SearchActivity.this, "Location saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(SearchActivity.this, "Location already saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } catch (Exception e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(SearchActivity.this, "Error saving location", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+                dbExecutor.shutdown();
             });
             
             holder.itemView.setOnClickListener(v -> {

@@ -1,6 +1,5 @@
 TODO 
 - saved locations should be clickable and lead to activelocationactivity
-- when adding location in acitiveLocationActivity -> go back to main right away
 - give button feedback to add button
 - bring back 2 buttons when empty main activity
 - AQI UI in main activity 
