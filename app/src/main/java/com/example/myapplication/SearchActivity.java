@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -89,9 +90,44 @@ public class SearchActivity extends AppCompatActivity {
             if (cleanStationName != null && cleanStationName.endsWith(", Austria")) {
                 cleanStationName = cleanStationName.substring(0, cleanStationName.length() - 9);
             }
+            final String finalCleanStationName = cleanStationName; // Make it final for lambda
             
             holder.tvStationName.setText(cleanStationName);
-            // No click action for plus button yet
+            
+            // Add click listener for plus button to save station to database
+            holder.btnPlus.setOnTouchListener((v, event) -> {
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    // Add immediate feedback
+                    Toast.makeText(SearchActivity.this, "Checking location...", Toast.LENGTH_SHORT).show();
+                    
+                    LocationEntity location = new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude);
+                    ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
+                    dbExecutor.execute(() -> {
+                        try {
+                            // Use the transaction method to check and insert atomically
+                            boolean wasInserted = DatabaseClient.getInstance(SearchActivity.this)
+                                    .getAppDatabase()
+                                    .locationDao()
+                                    .insertIfNotExists(location);
+                            
+                            runOnUiThread(() -> {
+                                if (wasInserted) {
+                                    Toast.makeText(SearchActivity.this, "Location saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(SearchActivity.this, "Location already saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } catch (Exception e) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(SearchActivity.this, "Error saving location", Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    });
+                    dbExecutor.shutdown();
+                    return true; // Consume the event
+                }
+                return false;
+            });
             
             holder.itemView.setOnClickListener(v -> {
                 // Navigate to ActiveLocationActivity with the station data
@@ -105,6 +141,8 @@ public class SearchActivity extends AppCompatActivity {
                             intent.putExtra("city", airQualityResult.city);
                             intent.putExtra("country", airQualityResult.country);
                             intent.putExtra("stationName", searchResult.stationName);
+                            intent.putExtra("latitude", searchResult.latitude);
+                            intent.putExtra("longitude", searchResult.longitude);
                             intent.putExtra("aqi", airQualityResult.aqi);
                             intent.putExtra("forecastDates", airQualityResult.forecastDates);
                             intent.putExtra("forecastAqi", airQualityResult.forecastAqi);

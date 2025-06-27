@@ -3,7 +3,8 @@ package com.example.myapplication;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "locations")
+@Entity(tableName = "locations", 
+        indices = {@androidx.room.Index(value = {"name", "latitude", "longitude"}, unique = true)})
 public class LocationEntity {
     @PrimaryKey(autoGenerate = true)
     public int id;

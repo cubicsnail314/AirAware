@@ -1,6 +1,6 @@
 package com.example.myapplication;
 
-import android.content.Intent;             // ← add this
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.Manifest;
@@ -10,33 +10,63 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Looper;
+import android.view.View;
+import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class MainActivity extends AppCompatActivity implements SavedLocationsAdapter.OnLocationClickListener {
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
 
     private MaterialButton btnSearch, btnNotifications, btnSettings, btnPin;
     private Button btnAddLocation, btnAddNearestLocation;
+    private RecyclerView recyclerViewLocations;
+    private TextView tvEmptyState;
+    private View bigButtonsContainer;
+    private SavedLocationsAdapter adapter;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialisierung
+        executorService = Executors.newSingleThreadExecutor();
+
+        // Initialize views
+        initializeViews();
+        setupClickListeners();
+        loadSavedLocations();
+    }
+
+    private void initializeViews() {
         btnSearch = findViewById(R.id.btn_search);
         btnNotifications = findViewById(R.id.btn_notifications);
         btnSettings = findViewById(R.id.btn_settings);
         btnPin = findViewById(R.id.btn_pin);
         btnAddLocation = findViewById(R.id.btn_add_location);
         btnAddNearestLocation = findViewById(R.id.btn_add_nearest_Location);
+        recyclerViewLocations = findViewById(R.id.recycler_view_locations);
+        tvEmptyState = findViewById(R.id.tv_empty_state);
+        bigButtonsContainer = findViewById(R.id.big_buttons_container);
 
-        // Klick-Listener
+        // Setup RecyclerView
+        recyclerViewLocations.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new SavedLocationsAdapter(null, this);
+        recyclerViewLocations.setAdapter(adapter);
+    }
+
+    private void setupClickListeners() {
         Intent Search = new Intent(this, SearchActivity.class);
 
         btnSearch.setOnClickListener(v -> startActivity(Search));
@@ -59,15 +89,86 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadSavedLocations() {
+        executorService.execute(() -> {
+            try {
+                List<LocationEntity> locations = DatabaseClient.getInstance(this)
+                        .getAppDatabase()
+                        .locationDao()
+                        .getAllLocations();
+                
+                runOnUiThread(() -> {
+                    if (locations != null && !locations.isEmpty()) {
+                        // Show saved locations
+                        adapter.updateLocations(locations);
+                        recyclerViewLocations.setVisibility(View.VISIBLE);
+                        bigButtonsContainer.setVisibility(View.GONE);
+                    } else {
+                        // Show big buttons
+                        recyclerViewLocations.setVisibility(View.GONE);
+                        bigButtonsContainer.setVisibility(View.VISIBLE);
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Error loading locations", Toast.LENGTH_SHORT).show();
+                    // Show big buttons as fallback
+                    recyclerViewLocations.setVisibility(View.GONE);
+                    bigButtonsContainer.setVisibility(View.VISIBLE);
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload locations when returning to the activity
+        loadSavedLocations();
+    }
+
+    @Override
+    public void onLocationClick(LocationEntity location) {
+        // Get air quality data for the selected location
+        executorService.execute(() -> {
+            AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(location.latitude, location.longitude);
+            
+            runOnUiThread(() -> {
+                Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
+                intent.putExtra("city", result.city);
+                intent.putExtra("country", result.country);
+                intent.putExtra("stationName", result.stationName);
+                intent.putExtra("aqi", result.aqi);
+                intent.putExtra("forecastDates", result.forecastDates);
+                intent.putExtra("forecastAqi", result.forecastAqi);
+                startActivity(intent);
+            });
+        });
+    }
+
+    @Override
+    public void onLocationDelete(LocationEntity location) {
+        executorService.execute(() -> {
+            DatabaseClient.getInstance(this)
+                    .getAppDatabase()
+                    .locationDao()
+                    .deleteLocation(location);
+
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Standort gelöscht", Toast.LENGTH_SHORT).show();
+                loadSavedLocations(); // Reload the list
+            });
+        });
+    }
+
     private void getPermissionAndLocation() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // Permission is not granted, request it
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                             REQUEST_LOCATION_PERMISSION);
                 } else {
                     // Permission already granted, proceed with location logic
@@ -187,6 +288,14 @@ public class MainActivity extends AppCompatActivity {
         } catch (SecurityException e) {
             System.out.println("SecurityException when requesting location: " + e.getMessage());
             Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (executorService != null) {
+            executorService.shutdown();
         }
     }
 }

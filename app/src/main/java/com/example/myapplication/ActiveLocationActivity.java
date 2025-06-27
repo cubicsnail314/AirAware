@@ -26,6 +26,8 @@ public class ActiveLocationActivity extends AppCompatActivity {
         String city = getIntent().getStringExtra("city");
         String country = getIntent().getStringExtra("country");
         String stationName = getIntent().getStringExtra("stationName");
+        double latitude = getIntent().getDoubleExtra("latitude", 0.0);
+        double longitude = getIntent().getDoubleExtra("longitude", 0.0);
         int aqi = getIntent().getIntExtra("aqi", -1);
         String[] forecastDates = getIntent().getStringArrayExtra("forecastDates");
         int[] forecastAqi = getIntent().getIntArrayExtra("forecastAqi");
@@ -38,6 +40,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         if (cleanStationName != null && cleanStationName.endsWith(", Austria")) {
             cleanStationName = cleanStationName.substring(0, cleanStationName.length() - 9);
         }
+        final String finalCleanStationName = cleanStationName; // Make it final for lambda
         tvStation.setText("Station: " + cleanStationName);
         tvAqi.setText(String.valueOf(aqi));
         tvAqiDescription.setText(getAqiDescription(aqi));
@@ -52,7 +55,32 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
         // Set up button listener
         findViewById(R.id.btn_plus).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(this, SearchActivity.class));
+            // Add immediate feedback
+            android.widget.Toast.makeText(ActiveLocationActivity.this, "Checking location...", android.widget.Toast.LENGTH_SHORT).show();
+            
+            // Save current station to database
+            LocationEntity location = new LocationEntity(stationName, longitude, latitude);
+            new Thread(() -> {
+                try {
+                    // Use the transaction method to check and insert atomically
+                    boolean wasInserted = DatabaseClient.getInstance(ActiveLocationActivity.this)
+                            .getAppDatabase()
+                            .locationDao()
+                            .insertIfNotExists(location);
+                    
+                    runOnUiThread(() -> {
+                        if (wasInserted) {
+                            android.widget.Toast.makeText(ActiveLocationActivity.this, "Location saved: " + stationName, android.widget.Toast.LENGTH_SHORT).show();
+                        } else {
+                            android.widget.Toast.makeText(ActiveLocationActivity.this, "Location already saved: " + stationName, android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(ActiveLocationActivity.this, "Error saving location", android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
         });
     }
 

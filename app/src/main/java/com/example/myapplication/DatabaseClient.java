@@ -8,7 +8,10 @@ public class DatabaseClient {
     private final AppDatabase appDatabase;
 
     private DatabaseClient(Context context) {
-        appDatabase = Room.databaseBuilder(context, AppDatabase.class, "MyLocationsDB").build();
+        appDatabase = Room.databaseBuilder(context, AppDatabase.class, "MyLocationsDB")
+                .addMigrations(AppDatabase.MIGRATION_1_2)
+                .fallbackToDestructiveMigration()
+                .build();
     }
 
     public static synchronized DatabaseClient getInstance(Context context) {
