@@ -49,16 +49,6 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/btn_view_location"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/location"
-                android:contentDescription="View location"
-                android:padding="12dp"
-                app:tint="@android:color/black" />
-
-            <ImageButton
                 android:id="@+id/btn_delete_location"
                 android:layout_width="48dp"
                 android:layout_height="48dp"

@@ -48,11 +48,6 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
         holder.tvLocationCoordinates.setText(String.format("Lat: %.4f, Lon: %.4f", 
                 location.latitude, location.longitude));
 
-        holder.btnViewLocation.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onLocationClick(location);
-            }
-        });
 
         holder.btnDeleteLocation.setOnClickListener(v -> {
             if (listener != null) {
@@ -84,7 +79,6 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
             super(itemView);
             tvLocationName = itemView.findViewById(R.id.tv_location_name);
             tvLocationCoordinates = itemView.findViewById(R.id.tv_location_coordinates);
-            btnViewLocation = itemView.findViewById(R.id.btn_view_location);
             btnDeleteLocation = itemView.findViewById(R.id.btn_delete_location);
         }
     }
