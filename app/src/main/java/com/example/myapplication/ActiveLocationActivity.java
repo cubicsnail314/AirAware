@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -67,6 +68,8 @@ public class ActiveLocationActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         if (wasInserted) {
                             android.widget.Toast.makeText(ActiveLocationActivity.this, "Location saved: " + stationName, android.widget.Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
                         } else {
                             android.widget.Toast.makeText(ActiveLocationActivity.this, "Location already saved: " + stationName, android.widget.Toast.LENGTH_SHORT).show();
                         }
