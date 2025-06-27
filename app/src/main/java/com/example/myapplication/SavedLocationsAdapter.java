@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAdapter.ViewHolder> {
 
@@ -53,6 +57,11 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
         holder.btnDeleteLocation.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onLocationDelete(location);
+            }
+        });
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onLocationClick(location);
             }
         });
     }

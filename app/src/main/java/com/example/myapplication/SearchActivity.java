@@ -84,14 +84,7 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             StationSearchResult searchResult = searchResults.get(position);
-            
-            // Clean up station name - remove ", Austria" if it exists
             String cleanStationName = searchResult.stationName;
-            if (cleanStationName != null && cleanStationName.endsWith(", Austria")) {
-                cleanStationName = cleanStationName.substring(0, cleanStationName.length() - 9);
-            }
-            final String finalCleanStationName = cleanStationName; // Make it final for lambda
-            
             holder.tvStationName.setText(cleanStationName);
             
             // Add click listener for plus button to save station to database
