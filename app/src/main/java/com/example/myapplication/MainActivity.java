@@ -18,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.Color;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -129,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         // Get air quality data for the selected location
         executorService.execute(() -> {
             AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(location.latitude, location.longitude);
-            
             runOnUiThread(() -> {
                 Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
                 intent.putExtra("city", result.city);
@@ -138,6 +139,9 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                 intent.putExtra("aqi", result.aqi);
                 intent.putExtra("forecastDates", result.forecastDates);
                 intent.putExtra("forecastAqi", result.forecastAqi);
+                // Always include correct coordinates
+                intent.putExtra("latitude", location.latitude);
+                intent.putExtra("longitude", location.longitude);
                 startActivity(intent);
             });
         });
@@ -186,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        setAqiColor(btnAddLocation, result.aqi);
                         Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
                         intent.putExtra("longitude", lon);
                         intent.putExtra("latitude", lat);
@@ -296,5 +301,27 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         if (executorService != null) {
             executorService.shutdown();
         }
+    }
+
+    private void setAqiColor(Button button, int aqi) {
+        int color;
+        if (aqi <= 50) {
+            color = Color.parseColor("#4CAF50"); // Green
+        } else if (aqi <= 100) {
+            color = Color.parseColor("#FFEB3B"); // Yellow
+        } else if (aqi <= 150) {
+            color = Color.parseColor("#FF9800"); // Orange
+        } else if (aqi <= 200) {
+            color = Color.parseColor("#F44336"); // Red
+        } else if (aqi <= 300) {
+            color = Color.parseColor("#9C27B0"); // Purple
+        } else {
+            color = Color.parseColor("#8D6E63"); // Maroon
+        }
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(16);
+        background.setColor(color);
+        button.setBackground(background);
     }
 }

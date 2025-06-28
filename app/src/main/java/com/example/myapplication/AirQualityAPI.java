@@ -129,13 +129,12 @@ public class AirQualityAPI {
                             String cityUrl = cityObj.get("url").getAsString();
                             System.out.println("City URL: " + cityUrl);
 
-                            // URL format: https://aqicn.org/city/austria/petersgasse--gegenuber-eisteichgasse
-                            // We need to extract the city name from the URL path
+                            // URL format: https://aqicn.org/city/country/city/station
                             String[] urlParts = cityUrl.split("/");
                             if (urlParts.length >= 6) {
                                 // The structure is: https://aqicn.org/city/country/city/station
-                                String urlCountry = urlParts[4]; // "austria"
-                                String urlCity = urlParts[5]; // "petersgasse--gegenuber-eisteichgasse"
+                                String urlCountry = urlParts[4];
+                                String urlCity = urlParts[5];
 
                                 System.out.println("URL Country: " + urlCountry);
                                 System.out.println("URL City: " + urlCity);
@@ -143,42 +142,19 @@ public class AirQualityAPI {
                                 // Clean up the URL city name
                                 urlCity = urlCity.replace("--", " ").replace("-", " ");
 
-                                // If the URL city still contains street terms, try to find the actual city
-                                // For Graz, Austria, we know this is Graz
-                                if (urlCountry.equals("austria") &&
-                                        (urlCity.contains("petersgasse") || urlCity.contains("eisteichgasse"))) {
-                                    city = "Graz";
-                                    System.out.println("Identified as Graz, Austria");
-                                } else {
-                                    // For other cases, try to extract meaningful city name
-                                    String[] words = urlCity.split(" ");
-                                    for (String word : words) {
-                                        if (word.length() > 2 && !word.equals("gegenuber") &&
-                                                !word.equals("opposite") && !word.equals("near")) {
-                                            city = word.substring(0, 1).toUpperCase() +
-                                                    word.substring(1).toLowerCase();
-                                            break;
-                                        }
+                                // Try to extract meaningful city name
+                                String[] words = urlCity.split(" ");
+                                for (String word : words) {
+                                    if (word.length() > 2 && !word.equals("gegenuber") &&
+                                            !word.equals("opposite") && !word.equals("near")) {
+                                        city = word.substring(0, 1).toUpperCase() +
+                                                word.substring(1).toLowerCase();
+                                        break;
                                     }
                                 }
 
                                 country = urlCountry.substring(0, 1).toUpperCase() +
                                         urlCountry.substring(1).toLowerCase();
-                            }
-                        } else {
-                            System.out.println("No URL available, using fallback parsing");
-                            // Fallback: try to extract from the name field
-                            String[] parts = stationName.split(",");
-                            if (parts.length >= 2) {
-                                country = parts[parts.length - 1].trim();
-
-                                if (parts.length >= 3) {
-                                    city = parts[parts.length - 2].trim();
-                                } else {
-                                    city = parts[0].trim();
-                                }
-                            } else {
-                                city = stationName;
                             }
                         }
                     } else {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.widget.ImageButton;
+import android.util.Log;
 
 public class SearchActivity extends AppCompatActivity {
     private SearchResultAdapter adapter;
@@ -91,8 +92,9 @@ public class SearchActivity extends AppCompatActivity {
             holder.btnPlus.setOnClickListener(v -> {
                 // Add immediate feedback
                 Toast.makeText(SearchActivity.this, "Checking location...", Toast.LENGTH_SHORT).show();
-                
-                LocationEntity location = new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude);
+                // Normalize and round before saving
+                LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude));
+                Log.d("SearchActivity", "[DEBUG] Saving location: name=" + location.name + ", lat=" + location.latitude + ", lon=" + location.longitude);
                 ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
                 dbExecutor.execute(() -> {
                     try {

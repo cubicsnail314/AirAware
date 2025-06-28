@@ -18,12 +18,12 @@ public interface LocationDao {
     @Delete
     void deleteLocation(LocationEntity location);
 
-    @Query("SELECT COUNT(*) FROM locations WHERE name = :name AND latitude = :latitude AND longitude = :longitude")
-    int checkLocationExists(String name, double latitude, double longitude);
+    @Query("SELECT COUNT(*) FROM locations WHERE name = :name COLLATE NOCASE")
+    int checkLocationExists(String name);
     
     @Transaction
     default boolean insertIfNotExists(LocationEntity location) {
-        int existingCount = checkLocationExists(location.name, location.latitude, location.longitude);
+        int existingCount = checkLocationExists(location.name);
         if (existingCount == 0) {
             insert(location);
             return true; // Successfully inserted

@@ -18,4 +18,11 @@ public class LocationEntity {
         this.longitude = longitude;
         this.latitude = latitude;
     }
+
+    public static LocationEntity normalize(LocationEntity loc) {
+        String normalizedName = loc.name.trim().toLowerCase();
+        double roundedLat = Math.round(loc.latitude * 10000.0) / 10000.0;
+        double roundedLon = Math.round(loc.longitude * 10000.0) / 10000.0;
+        return new LocationEntity(normalizedName, roundedLon, roundedLat);
+    }
 } 

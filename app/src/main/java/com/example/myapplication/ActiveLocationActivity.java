@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,17 +21,27 @@ public class ActiveLocationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nearest_location_result);
 
+        // Set up toolbar with back button
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_active_location);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
+
         TextView tvCity = findViewById(R.id.tv_city);
         TextView tvCountry = findViewById(R.id.tv_country);
         TextView tvStation = findViewById(R.id.tv_station);
         TextView tvAqi = findViewById(R.id.tv_aqi);
         TextView tvAqiDescription = findViewById(R.id.tv_aqi_description);
+        TextView tvAqiLabel = findViewById(R.id.tv_aqi_label);
 
         String city = getIntent().getStringExtra("city");
         String country = getIntent().getStringExtra("country");
         String stationName = getIntent().getStringExtra("stationName");
-        double latitude = getIntent().getDoubleExtra("latitude", 0.0);
-        double longitude = getIntent().getDoubleExtra("longitude", 0.0);
+        double latitude = roundCoord(getIntent().getDoubleExtra("latitude", 0.0));
+        double longitude = roundCoord(getIntent().getDoubleExtra("longitude", 0.0));
         int aqi = getIntent().getIntExtra("aqi", -1);
         String[] forecastDates = getIntent().getStringArrayExtra("forecastDates");
         int[] forecastAqi = getIntent().getIntArrayExtra("forecastAqi");
@@ -41,14 +54,36 @@ public class ActiveLocationActivity extends AppCompatActivity {
         tvStation.setText("Station: " + cleanStationName);
         tvAqi.setText(String.valueOf(aqi));
         tvAqiDescription.setText(getAqiDescription(aqi));
+        tvAqi.setShadowLayer(4, 0, 0, Color.BLACK);
+        tvAqiLabel.setShadowLayer(4, 0, 0, Color.BLACK);
+        tvAqiDescription.setShadowLayer(4, 0, 0, Color.BLACK);
         
         // Set AQI color
-        setAqiColor(tvAqi, aqi);
+        LinearLayout layoutAqiBackground = findViewById(R.id.layout_aqi_background);
+        setAqiColor(layoutAqiBackground, aqi);
 
         // Set up forecast
         if (forecastDates != null && forecastAqi != null) {
             setupForecast(forecastDates, forecastAqi);
         }
+
+        // Normalize location entity for DB operations
+        LocationEntity normalizedLoc = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
+        // Hide plus button if location is already saved
+        android.widget.ImageButton btnPlus = findViewById(R.id.btn_plus);
+        new Thread(() -> {
+            boolean exists = DatabaseClient.getInstance(this)
+                .getAppDatabase()
+                .locationDao()
+                .checkLocationExists(normalizedLoc.name) > 0;
+            runOnUiThread(() -> {
+                if (exists) {
+                    btnPlus.setVisibility(android.view.View.GONE);
+                } else {
+                    btnPlus.setVisibility(android.view.View.VISIBLE);
+                }
+            });
+        }).start();
 
         // Set up button listener
         findViewById(R.id.btn_plus).setOnClickListener(v -> {
@@ -56,7 +91,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
             android.widget.Toast.makeText(ActiveLocationActivity.this, "Checking location...", android.widget.Toast.LENGTH_SHORT).show();
             
             // Save current station to database
-            LocationEntity location = new LocationEntity(stationName, longitude, latitude);
+            LocationEntity location = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
             new Thread(() -> {
                 try {
                     // Use the transaction method to check and insert atomically
@@ -83,7 +118,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         });
     }
 
-    private void setAqiColor(TextView textView, int aqi) {
+    private void setAqiColor(View view, int aqi) {
         int color;
         if (aqi <= 50) {
             color = Color.parseColor("#4CAF50"); // Green
@@ -98,12 +133,11 @@ public class ActiveLocationActivity extends AppCompatActivity {
         } else {
             color = Color.parseColor("#8D6E63"); // Maroon
         }
-
         GradientDrawable background = new GradientDrawable();
         background.setShape(GradientDrawable.RECTANGLE);
         background.setCornerRadius(16);
         background.setColor(color);
-        textView.setBackground(background);
+        view.setBackground(background);
     }
 
     private void setupForecast(String[] dates, int[] aqiValues) {
@@ -118,18 +152,21 @@ public class ActiveLocationActivity extends AppCompatActivity {
             tvDate1.setText(formatDate(dates[0]));
             tvAqi1.setText(String.valueOf(aqiValues[0]));
             setAqiColor(tvAqi1, aqiValues[0]);
+            tvAqi1.setShadowLayer(4, 0, 0, Color.BLACK);
         }
 
         if (dates.length > 1 && aqiValues.length > 1) {
             tvDate2.setText(formatDate(dates[1]));
             tvAqi2.setText(String.valueOf(aqiValues[1]));
             setAqiColor(tvAqi2, aqiValues[1]);
+            tvAqi2.setShadowLayer(4, 0, 0, Color.BLACK);
         }
 
         if (dates.length > 2 && aqiValues.length > 2) {
             tvDate3.setText(formatDate(dates[2]));
             tvAqi3.setText(String.valueOf(aqiValues[2]));
             setAqiColor(tvAqi3, aqiValues[2]);
+            tvAqi3.setShadowLayer(4, 0, 0, Color.BLACK);
         }
     }
 
@@ -158,5 +195,10 @@ public class ActiveLocationActivity extends AppCompatActivity {
         } else {
             return "Hazardous";
         }
+    }
+
+    // Utility method to round coordinates
+    public static double roundCoord(double value) {
+        return Math.round(value * 10000.0) / 10000.0;
     }
 } 
