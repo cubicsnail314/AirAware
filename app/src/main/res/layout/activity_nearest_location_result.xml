@@ -70,36 +70,62 @@
                 android:textColor="#666666"
                 android:layout_marginBottom="12dp"/>
 
-            <TextView
-                android:id="@+id/tv_aqi"
-                android:layout_width="wrap_content"
+            <!-- AQI section with centered content -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:padding="10dp"
-                android:background="@drawable/aqi_background"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="6dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/tv_aqi_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AQI"
-                android:textSize="14sp"
-                android:textColor="#666666"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="2dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/aqi_background"
+                    android:gravity="center"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/tv_aqi_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tv_aqi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"/>
+
+                        <TextView
+                            android:id="@+id/tv_aqi_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AQI"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:layout_marginStart="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_aqi_description"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:gravity="center_vertical"
+                            android:layout_marginStart="12dp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <!-- Forecast section inside the card -->
             <LinearLayout

@@ -93,7 +93,7 @@
         <Button
             android:id="@+id/btn_add_location"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="350dp"
+            android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginTop="20dp"
             android:backgroundTint="#E3F2FD"
@@ -107,7 +107,7 @@
         <Button
             android:id="@+id/btn_add_nearest_Location"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="350dp"
+            android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginTop="16dp"
             android:padding="24dp"
