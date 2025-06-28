@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,7 +71,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         // Normalize location entity for DB operations
         LocationEntity normalizedLoc = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
         // Hide plus button if location is already saved
-        android.widget.ImageButton btnPlus = findViewById(R.id.btn_plus);
+        MaterialButton btnPlus = findViewById(R.id.btn_plus);
         new Thread(() -> {
             boolean exists = DatabaseClient.getInstance(this)
                 .getAppDatabase()

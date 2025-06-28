@@ -3,10 +3,13 @@ package com.example.myapplication;
 import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +24,7 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
 
     private List<LocationEntity> locations;
     private OnLocationClickListener listener;
+    private ExecutorService executorService;
 
     public interface OnLocationClickListener {
         void onLocationClick(LocationEntity location);
@@ -30,6 +34,7 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
     public SavedLocationsAdapter(List<LocationEntity> locations, OnLocationClickListener listener) {
         this.locations = locations;
         this.listener = listener;
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     @NonNull
@@ -45,9 +50,29 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
         LocationEntity location = locations.get(position);
         
         holder.tvLocationName.setText(location.name);
-        holder.tvLocationCoordinates.setText(String.format("Lat: %.4f, Lon: %.4f", 
-                location.latitude, location.longitude));
-
+        
+        // Show loading state initially
+        holder.tvAqiNumber.setText("--");
+        
+        // Fetch AQI data for this location
+        executorService.execute(() -> {
+            try {
+                AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(location.latitude, location.longitude);
+                holder.itemView.post(() -> {
+                    if (result != null && result.aqi > 0) {
+                        holder.tvAqiNumber.setText(String.valueOf(result.aqi));
+                        setAqiColor(holder.tvAqiNumber, result.aqi);
+                        holder.tvAqiNumber.setShadowLayer(2, 0, 0, Color.BLACK);
+                    } else {
+                        holder.tvAqiNumber.setText("--");
+                    }
+                });
+            } catch (Exception e) {
+                holder.itemView.post(() -> {
+                    holder.tvAqiNumber.setText("--");
+                });
+            }
+        });
 
         holder.btnDeleteLocation.setOnClickListener(v -> {
             if (listener != null) {
@@ -71,14 +96,36 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
         notifyDataSetChanged();
     }
 
+    private void setAqiColor(View view, int aqi) {
+        int color;
+        if (aqi <= 50) {
+            color = Color.parseColor("#4CAF50"); // Green
+        } else if (aqi <= 100) {
+            color = Color.parseColor("#FFEB3B"); // Yellow
+        } else if (aqi <= 150) {
+            color = Color.parseColor("#FF9800"); // Orange
+        } else if (aqi <= 200) {
+            color = Color.parseColor("#F44336"); // Red
+        } else if (aqi <= 300) {
+            color = Color.parseColor("#9C27B0"); // Purple
+        } else {
+            color = Color.parseColor("#8D6E63"); // Maroon
+        }
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(8);
+        background.setColor(color);
+        view.setBackground(background);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvLocationName, tvLocationCoordinates;
-        ImageButton btnViewLocation, btnDeleteLocation;
+        TextView tvLocationName, tvAqiNumber;
+        ImageButton btnDeleteLocation;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvLocationName = itemView.findViewById(R.id.tv_location_name);
-            tvLocationCoordinates = itemView.findViewById(R.id.tv_location_coordinates);
+            tvAqiNumber = itemView.findViewById(R.id.tv_aqi_number);
             btnDeleteLocation = itemView.findViewById(R.id.btn_delete_location);
         }
     }
