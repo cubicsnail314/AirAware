@@ -24,46 +24,63 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Benutzereinstellungen -->
+            <!-- App Sprache -->
             <TextView
-                android:text="Benutzereinstellungen"
+                android:text="App Sprache"
                 android:textStyle="bold"
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp" />
+            <RadioGroup
+                android:id="@+id/radio_language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/radio_de"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Deutsch" />
+                <RadioButton
+                    android:id="@+id/radio_en"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Englisch"
+                    android:layout_marginStart="24dp" />
+            </RadioGroup>
 
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginVertical="12dp" />
 
-            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="AQI-Index" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="US AQI*" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Einheit" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="km/m, °C, mbar" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Sprache" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Systemberechtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-            </LinearLayout>
-
-            <!-- Anzeigen -->
+            <!-- Luftqualität Index -->
             <TextView
-                android:text="Anzeigen"
+                android:text="Luftqualität Index"
                 android:textStyle="bold"
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp"
+                android:paddingTop="8dp"
                 android:paddingBottom="4dp" />
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="Widget-Trübung" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Pollen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="An" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-            </LinearLayout>
+            <RadioGroup
+                android:id="@+id/radio_aqi_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/radio_aqi_usa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AQI (USA)" />
+                <RadioButton
+                    android:id="@+id/radio_aqi_wien"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Wiener Luftgüteindex"
+                    android:layout_marginStart="24dp" />
+            </RadioGroup>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginVertical="12dp" />
 
             <!-- Benachrichtigungen -->
             <TextView
@@ -72,58 +89,51 @@
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp"
+                android:paddingTop="8dp"
                 android:paddingBottom="4dp" />
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="Smart-Benachrichtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Täglicher Bericht" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Grenzwertmeldungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="Für Standorte aktiviert: Nein\nFür Geräte aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-                <TextView android:text="Benachrichtigungen" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-                <TextView android:text="Aktiviert: Nein" android:textSize="12sp" android:textColor="#888" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingBottom="8dp" />
-            </LinearLayout>
-
-            <!-- Unterstützen -->
-            <TextView
-                android:text="Unterstützen"
-                android:textStyle="bold"
-                android:textColor="#2196F3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="16dp"
-                android:paddingBottom="4dp" />
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-            <TextView android:text="Hilfe" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-
-            <!-- Über IQAir -->
-            <TextView
-                android:text="Über IQAir"
-                android:textStyle="bold"
-                android:textColor="#2196F3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="16dp"
-                android:paddingBottom="4dp" />
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" />
-            <TextView android:text="Über diese App" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-            <TextView android:text="Nutzungsbedingungen &amp; Datenschutzerklärung" android:textSize="16sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp" />
-
-            <!-- Feedback Button -->
-            <Button
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Geben Sie uns Feedback"
-                android:backgroundTint="#E3F2FD"
-                android:textColor="#2196F3"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                app:cornerRadius="16dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:text="Aktivieren"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp" />
+                <Switch
+                    android:id="@+id/switch_notifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:text="Grenzwert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp" />
+                <EditText
+                    android:id="@+id/edit_threshold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:hint="z.B. 100"
+                    android:enabled="false" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/description_threshold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ab welchem Luftqualitäts Index eine Warnung gesendet wird"
+                android:textSize="12sp"
+                android:textColor="#888"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout> 
