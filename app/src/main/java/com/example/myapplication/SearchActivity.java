@@ -136,8 +136,6 @@ public class SearchActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         if (airQualityResult != null) {
                             android.content.Intent intent = new android.content.Intent(SearchActivity.this, ActiveLocationActivity.class);
-                            intent.putExtra("city", airQualityResult.city);
-                            intent.putExtra("country", airQualityResult.country);
                             intent.putExtra("stationName", searchResult.stationName);
                             intent.putExtra("latitude", searchResult.latitude);
                             intent.putExtra("longitude", searchResult.longitude);

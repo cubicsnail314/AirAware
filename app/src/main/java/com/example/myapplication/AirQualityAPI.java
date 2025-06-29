@@ -88,79 +88,14 @@ public class AirQualityAPI {
             JsonObject jobject = jelement.getAsJsonObject();
 
             if (!"ok".equals(jobject.get("status").getAsString())) {
-                return new AirQualityResult(-1, "Unknown", "Unknown");
+                return new AirQualityResult(-1, "Unknown", new String[0], new int[0]);
             }
 
             JsonObject data = jobject.getAsJsonObject("data");
             int aqi = data.get("aqi").getAsInt();
 
-            // Get city information from the API's city object
-            String city = "Unknown";
-            String country = "Unknown";
-            String stationName = "Unknown";
-
             JsonObject cityObj = data.getAsJsonObject("city");
-            if (cityObj != null) {
-                // Check if the API provides city name directly
-                if (cityObj.has("name")) {
-                    stationName = cityObj.get("name").getAsString();
-
-                    // Check if the name contains street-level information
-                    if (stationName.contains("gasse") || stationName.contains("straße") ||
-                            stationName.contains("street") || stationName.contains("avenue") ||
-                            stationName.contains("gegenüber") || stationName.contains("opposite")) {
-
-                        // Try to extract city from URL if available
-                        if (cityObj.has("url")) {
-                            String cityUrl = cityObj.get("url").getAsString();
-
-                            // URL format: https://aqicn.org/city/country/city/station
-                            String[] urlParts = cityUrl.split("/");
-                            if (urlParts.length >= 6) {
-                                // The structure is: https://aqicn.org/city/country/city/station
-                                String urlCountry = urlParts[4];
-                                String urlCity = urlParts[5];
-
-                                // Clean up the URL city name
-                                urlCity = urlCity.replace("--", " ").replace("-", " ");
-
-                                // Try to extract meaningful city name
-                                String[] words = urlCity.split(" ");
-                                for (String word : words) {
-                                    if (word.length() > 2 && !word.equals("gegenuber") &&
-                                            !word.equals("opposite") && !word.equals("near")) {
-                                        city = word.substring(0, 1).toUpperCase() +
-                                                word.substring(1).toLowerCase();
-                                        break;
-                                    }
-                                }
-
-                                country = urlCountry.substring(0, 1).toUpperCase() +
-                                        urlCountry.substring(1).toLowerCase();
-                            }
-                        }
-                    } else {
-                        // The name doesn't contain street terms, use normal parsing
-                        String[] parts = stationName.split(",");
-                        if (parts.length >= 2) {
-                            country = parts[parts.length - 1].trim();
-
-                            if (parts.length >= 3) {
-                                city = parts[parts.length - 2].trim();
-                            } else {
-                                city = parts[0].trim();
-                            }
-                        } else {
-                            city = stationName;
-                        }
-                    }
-                }
-
-                // Check if API provides country separately
-                if (cityObj.has("country")) {
-                    country = cityObj.get("country").getAsString();
-                }
-            }
+            String stationName = cityObj.get("name").getAsString();
 
             // Extract forecast for next 3 days (pm10 AQI)
             String[] forecastDates = new String[3];
@@ -202,11 +137,11 @@ public class AirQualityAPI {
                 }
             }
 
-            return new AirQualityResult(aqi, city, country, stationName, forecastDates, forecastAqi);
+            return new AirQualityResult(aqi, stationName, forecastDates, forecastAqi);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new AirQualityResult(-1, "Error", "Error");
+            return new AirQualityResult(-1, "Error", new String[0], new int[0]);
         }
     }
 }

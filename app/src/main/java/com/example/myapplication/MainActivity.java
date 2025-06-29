@@ -237,8 +237,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
             AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(location.latitude, location.longitude);
             runOnUiThread(() -> {
                 Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
-                intent.putExtra("city", result.city);
-                intent.putExtra("country", result.country);
                 intent.putExtra("stationName", result.stationName);
                 intent.putExtra("aqi", result.aqi);
                 intent.putExtra("forecastDates", result.forecastDates);
@@ -289,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
             public void run() {
                 // This runs in a background thread
                 AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(lat, lon);
-                System.out.println("Location-based AQI: " + result.aqi + ", City: " + result.city + ", Country: " + result.country);
+                System.out.println("Location-based AQI: " + result.aqi + ", City: " + ", Country: ");
                 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -298,8 +296,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                         Intent intent = new Intent(MainActivity.this, ActiveLocationActivity.class);
                         intent.putExtra("longitude", lon);
                         intent.putExtra("latitude", lat);
-                        intent.putExtra("city", result.city);
-                        intent.putExtra("country", result.country);
                         intent.putExtra("stationName", result.stationName);
                         intent.putExtra("aqi", result.aqi);
                         intent.putExtra("forecastDates", result.forecastDates);
