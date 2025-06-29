@@ -32,10 +32,9 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_plus"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/plus"
             app:iconTint="@android:color/black"
             app:iconSize="24dp"
@@ -63,26 +62,21 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/tv_city"
+                android:id="@+id/tv_country"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/tv_country"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:textColor="@android:color/black"
                 android:layout_marginBottom="4dp"/>
 
             <TextView
                 android:id="@+id/tv_station"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="#666666"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
                 android:layout_marginBottom="12dp"/>
 
             <!-- AQI section with centered content -->

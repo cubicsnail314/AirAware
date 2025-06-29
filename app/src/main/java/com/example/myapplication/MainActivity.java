@@ -37,6 +37,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.util.Log;
 import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 public class MainActivity extends AppCompatActivity implements SavedLocationsAdapter.OnLocationClickListener {
 
@@ -49,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     private SavedLocationsAdapter adapter;
     private ExecutorService executorService;
     private ActivityResultLauncher<String> notificationPermissionLauncher;
+    private SensorManager sensorManager;
+    private Sensor lightSensor;
+    private SensorEventListener lightListener;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -116,12 +123,6 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
             Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
             startActivity(intent);
         });
-        
-        // Add long press on notifications button to test notifications
-        btnNotifications.setOnLongClickListener(v -> {
-            testNotification();
-            return true;
-        });
 
         btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -171,11 +172,38 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload locations when returning to the activity
         loadSavedLocations();
-        
-        // Reschedule worker if settings changed
         rescheduleWorkerIfNeeded();
+        // Register light sensor
+        if (sensorManager == null) {
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        }
+        if (lightSensor == null && sensorManager != null) {
+            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        }
+        if (lightListener == null) {
+            lightListener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    float lux = event.values[0];
+                    MyApplication.setLatestLux(lux);
+                }
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+            };
+        }
+        if (sensorManager != null && lightSensor != null && lightListener != null) {
+            sensorManager.registerListener(lightListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister light sensor
+        if (sensorManager != null && lightListener != null) {
+            sensorManager.unregisterListener(lightListener);
+        }
     }
     
     private void rescheduleWorkerIfNeeded() {
@@ -404,24 +432,37 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     }
 
     private void setAqiColor(Button button, int aqi) {
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        String aqiType = prefs.getString("aqi_type", "us");
         GradientDrawable gradient = new GradientDrawable();
         gradient.setShape(GradientDrawable.RECTANGLE);
         gradient.setCornerRadius(16);
 
-        if (aqi <= 50) {
-            gradient.setColor(Color.parseColor("#00E400")); // Green
-        } else if (aqi <= 100) {
-            gradient.setColor(Color.parseColor("#FFFF00")); // Yellow
-        } else if (aqi <= 150) {
-            gradient.setColor(Color.parseColor("#FF7E00")); // Orange
-        } else if (aqi <= 200) {
-            gradient.setColor(Color.parseColor("#FF0000")); // Red
-        } else if (aqi <= 300) {
-            gradient.setColor(Color.parseColor("#8F3F97")); // Purple
+        if ("wien".equals(aqiType)) {
+            AqiUtils.WienerAqiInfo info = AqiUtils.getWienerAqiInfo(this, aqi);
+            gradient.setColor(info.color);
+            // Optionally, set the button text to the Wiener index and description
+            button.setText(String.valueOf(info.index));
+            button.setTextColor(Color.BLACK);
+            button.setAllCaps(false);
+            button.setText(info.index + "\n" + info.description);
         } else {
-            gradient.setColor(Color.parseColor("#7E0023")); // Maroon
+            if (aqi <= 50) {
+                gradient.setColor(Color.parseColor("#00E400")); // Green
+            } else if (aqi <= 100) {
+                gradient.setColor(Color.parseColor("#FFFF00")); // Yellow
+            } else if (aqi <= 150) {
+                gradient.setColor(Color.parseColor("#FF7E00")); // Orange
+            } else if (aqi <= 200) {
+                gradient.setColor(Color.parseColor("#FF0000")); // Red
+            } else if (aqi <= 300) {
+                gradient.setColor(Color.parseColor("#8F3F97")); // Purple
+            } else {
+                gradient.setColor(Color.parseColor("#7E0023")); // Maroon
+            }
+            button.setText(String.valueOf(aqi));
+            button.setTextColor(Color.WHITE);
         }
-
         button.setBackground(gradient);
     }
     

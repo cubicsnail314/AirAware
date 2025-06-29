@@ -94,10 +94,22 @@ public class AirQualityAPI {
             JsonObject data = jobject.getAsJsonObject("data");
             int aqi = data.get("aqi").getAsInt();
 
-            JsonObject cityObj = data.getAsJsonObject("city");
-            String stationName = cityObj.get("name").getAsString();
+            // Get country from station name (split on last comma)
 
-            // Extract forecast for next 3 days (pm10 AQI)
+            String stationName = "Unknown";
+
+            JsonObject cityObj = data.getAsJsonObject("city");
+            if (cityObj != null && cityObj.has("name")) {
+                String fullName = cityObj.get("name").getAsString();
+                int lastComma = fullName.lastIndexOf(",");
+                if (lastComma != -1) {
+                    stationName = fullName.substring(0, lastComma).trim();
+                } else {
+                    stationName = fullName.trim();
+                }
+            }
+
+            // Extract forecast for next 3 days
             String[] forecastDates = new String[3];
             int[] forecastAqi = new int[3];
             if (data.has("forecast")) {

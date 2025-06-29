@@ -50,6 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         EditText editThreshold = findViewById(R.id.edit_threshold);
+        EditText editThresholdOutside = findViewById(R.id.edit_threshold_outside);
         RadioGroup radioLanguage = findViewById(R.id.radio_language);
         RadioGroup radioAqiType = findViewById(R.id.radio_aqi_type);
         Switch switchNotifications = findViewById(R.id.switch_notifications);
@@ -58,18 +59,24 @@ public class SettingsActivity extends AppCompatActivity {
         editThreshold.setFilters(new InputFilter[]{
             new InputFilterMinMax(0, Integer.MAX_VALUE)
         });
+        editThresholdOutside.setFilters(new InputFilter[]{
+            new InputFilterMinMax(0, Integer.MAX_VALUE)
+        });
 
         // Select all text when the box is focused
         editThreshold.setSelectAllOnFocus(true);
+        editThresholdOutside.setSelectAllOnFocus(true);
 
         // Load saved settings
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         int threshold = prefs.getInt(KEY_THRESHOLD, 100);
+        int thresholdOutside = prefs.getInt("aqi_threshold_outside", 0);
         String language = prefs.getString(KEY_LANGUAGE, "de");
         String aqiType = prefs.getString(KEY_AQI_TYPE, "usa");
         boolean notificationsEnabled = prefs.getBoolean(KEY_NOTIFICATIONS, false);
 
         editThreshold.setText(String.valueOf(threshold));
+        editThresholdOutside.setText(thresholdOutside == 0 ? "" : String.valueOf(thresholdOutside));
         switchNotifications.setChecked(notificationsEnabled);
 
         // Set language radio
@@ -101,6 +108,16 @@ public class SettingsActivity extends AppCompatActivity {
                 int value = 0;
                 try { value = Integer.parseInt(s.toString()); } catch (Exception ignored) {}
                 prefs.edit().putInt(KEY_THRESHOLD, value).apply();
+            }
+        });
+        // Save threshold outside on change
+        editThresholdOutside.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                int value = 0;
+                try { value = Integer.parseInt(s.toString()); } catch (Exception ignored) {}
+                prefs.edit().putInt("aqi_threshold_outside", value).apply();
             }
         });
 

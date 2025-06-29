@@ -47,52 +47,56 @@ public class ActiveLocationActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        TextView tvCity = findViewById(R.id.tv_city);
         TextView tvCountry = findViewById(R.id.tv_country);
         TextView tvStation = findViewById(R.id.tv_station);
         TextView tvAqi = findViewById(R.id.tv_aqi);
         TextView tvAqiDescription = findViewById(R.id.tv_aqi_description);
         TextView tvAqiLabel = findViewById(R.id.tv_aqi_label);
 
-        String city = getIntent().getStringExtra("city");
-        String country = getIntent().getStringExtra("country");
         String stationName = getIntent().getStringExtra("stationName");
         double latitude = roundCoord(getIntent().getDoubleExtra("latitude", 0.0));
         double longitude = roundCoord(getIntent().getDoubleExtra("longitude", 0.0));
         int aqi = getIntent().getIntExtra("aqi", -1);
         String[] forecastDates = getIntent().getStringArrayExtra("forecastDates");
         int[] forecastAqi = getIntent().getIntArrayExtra("forecastAqi");
-
-        tvCity.setText(city);
-        tvCountry.setText(country);
-
-        String cleanStationName = stationName;
-
-        tvStation.setText(getString(R.string.station) + " " + cleanStationName);
-        tvAqi.setText(String.valueOf(aqi));
-        tvAqiDescription.setText(getAqiDescription(aqi));
-        tvAqi.setShadowLayer(4, 0, 0, Color.BLACK);
-        tvAqiLabel.setShadowLayer(4, 0, 0, Color.BLACK);
-        tvAqiDescription.setShadowLayer(4, 0, 0, Color.BLACK);
+        tvCountry.setText("");
+        tvStation.setText(stationName != null ? stationName : "");
         
         // Set AQI color
         LinearLayout layoutAqiBackground = findViewById(R.id.layout_aqi_background);
-        setAqiColor(layoutAqiBackground, aqi);
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        String aqiType = prefs.getString("aqi_type", "us");
+        if ("wien".equals(aqiType)) {
+            AqiUtils.WienerAqiInfo info = AqiUtils.getWienerAqiInfo(this, aqi);
+            tvAqi.setText(String.valueOf(info.index));
+            String wienDesc = getString(getResources().getIdentifier("wien_index_" + info.index, "string", getPackageName()));
+            tvAqiDescription.setText(wienDesc);
+            setAqiColor(layoutAqiBackground, info.color, true);
+            tvAqi.setTextColor(Color.WHITE);
+            tvAqiLabel.setText("");
+        } else {
+            tvAqi.setText(String.valueOf(aqi));
+            tvAqiDescription.setText(getAqiDescription(aqi));
+            setAqiColor(layoutAqiBackground, aqi, false);
+            tvAqi.setTextColor(Color.WHITE);
+            tvAqiLabel.setText("AQI");
+        }
+        tvAqi.setShadowLayer(4, 0, 0, Color.BLACK);
+        tvAqiDescription.setShadowLayer(4, 0, 0, Color.BLACK);
 
         // Set up forecast
         if (forecastDates != null && forecastAqi != null) {
-            setupForecast(forecastDates, forecastAqi);
+            setupForecast(forecastDates, forecastAqi, aqiType);
         }
 
-        // Normalize location entity for DB operations
-        LocationEntity normalizedLoc = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
-        // Hide plus button if location is already saved
+        // Hide plus button if location is already saved (by lat/lon margin)
         MaterialButton btnPlus = findViewById(R.id.btn_plus);
+        double margin = 0.001; // ~100 meters
         new Thread(() -> {
             boolean exists = DatabaseClient.getInstance(this)
                 .getAppDatabase()
                 .locationDao()
-                .checkLocationExists(normalizedLoc.name) > 0;
+                .checkLocationExistsByLatLon(latitude, longitude, margin) > 0;
             runOnUiThread(() -> {
                 if (exists) {
                     btnPlus.setVisibility(android.view.View.GONE);
@@ -135,20 +139,22 @@ public class ActiveLocationActivity extends AppCompatActivity {
         });
     }
 
-    private void setAqiColor(View view, int aqi) {
-        int color;
-        if (aqi <= 50) {
-            color = Color.parseColor("#4CAF50"); // Green
-        } else if (aqi <= 100) {
-            color = Color.parseColor("#FFEB3B"); // Yellow
-        } else if (aqi <= 150) {
-            color = Color.parseColor("#FF9800"); // Orange
-        } else if (aqi <= 200) {
-            color = Color.parseColor("#F44336"); // Red
-        } else if (aqi <= 300) {
-            color = Color.parseColor("#9C27B0"); // Purple
-        } else {
-            color = Color.parseColor("#8D6E63"); // Maroon
+    private void setAqiColor(View view, int colorOrAqi, boolean useDirectColor) {
+        int color = colorOrAqi;
+        if (!useDirectColor) {
+            if (colorOrAqi <= 50) {
+                color = Color.parseColor("#4CAF50"); // Green
+            } else if (colorOrAqi <= 100) {
+                color = Color.parseColor("#FFEB3B"); // Yellow
+            } else if (colorOrAqi <= 150) {
+                color = Color.parseColor("#FF9800"); // Orange
+            } else if (colorOrAqi <= 200) {
+                color = Color.parseColor("#F44336"); // Red
+            } else if (colorOrAqi <= 300) {
+                color = Color.parseColor("#9C27B0"); // Purple
+            } else if (colorOrAqi > 300) {
+                color = Color.parseColor("#8D6E63"); // Maroon
+            }
         }
         GradientDrawable background = new GradientDrawable();
         background.setShape(GradientDrawable.RECTANGLE);
@@ -157,7 +163,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         view.setBackground(background);
     }
 
-    private void setupForecast(String[] dates, int[] aqiValues) {
+    private void setupForecast(String[] dates, int[] aqiValues, String aqiType) {
         TextView tvDate1 = findViewById(R.id.tv_forecast_date1);
         TextView tvDate2 = findViewById(R.id.tv_forecast_date2);
         TextView tvDate3 = findViewById(R.id.tv_forecast_date3);
@@ -179,23 +185,50 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
         if (dates.length > 0 && aqiValues.length > 0 && dates[0] != null) {
             tvDate1.setText(formatDate(dates[0]));
-            tvAqi1.setText(String.valueOf(aqiValues[0]));
-            setAqiColor(tvAqi1, aqiValues[0]);
-            tvAqi1.setShadowLayer(4, 0, 0, Color.BLACK);
+            if ("wien".equals(aqiType)) {
+                AqiUtils.WienerAqiInfo info = AqiUtils.getWienerAqiInfo(this, aqiValues[0]);
+                tvAqi1.setText(String.valueOf(info.index));
+                setAqiColor(tvAqi1, info.color, true);
+                tvAqi1.setTextColor(Color.WHITE);
+                tvAqi1.setShadowLayer(4, 0, 0, Color.BLACK);
+            } else {
+                tvAqi1.setText(String.valueOf(aqiValues[0]));
+                setAqiColor(tvAqi1, aqiValues[0], false);
+                tvAqi1.setTextColor(Color.WHITE);
+                tvAqi1.setShadowLayer(4, 0, 0, Color.BLACK);
+            }
         }
 
         if (dates.length > 1 && aqiValues.length > 1 && dates[1] != null) {
             tvDate2.setText(formatDate(dates[1]));
-            tvAqi2.setText(String.valueOf(aqiValues[1]));
-            setAqiColor(tvAqi2, aqiValues[1]);
-            tvAqi2.setShadowLayer(4, 0, 0, Color.BLACK);
+            if ("wien".equals(aqiType)) {
+                AqiUtils.WienerAqiInfo info = AqiUtils.getWienerAqiInfo(this, aqiValues[1]);
+                tvAqi2.setText(String.valueOf(info.index));
+                setAqiColor(tvAqi2, info.color, true);
+                tvAqi2.setTextColor(Color.WHITE);
+                tvAqi2.setShadowLayer(4, 0, 0, Color.BLACK);
+            } else {
+                tvAqi2.setText(String.valueOf(aqiValues[1]));
+                setAqiColor(tvAqi2, aqiValues[1], false);
+                tvAqi2.setTextColor(Color.WHITE);
+                tvAqi2.setShadowLayer(4, 0, 0, Color.BLACK);
+            }
         }
 
         if (dates.length > 2 && aqiValues.length > 2 && dates[2] != null) {
             tvDate3.setText(formatDate(dates[2]));
-            tvAqi3.setText(String.valueOf(aqiValues[2]));
-            setAqiColor(tvAqi3, aqiValues[2]);
-            tvAqi3.setShadowLayer(4, 0, 0, Color.BLACK);
+            if ("wien".equals(aqiType)) {
+                AqiUtils.WienerAqiInfo info = AqiUtils.getWienerAqiInfo(this, aqiValues[2]);
+                tvAqi3.setText(String.valueOf(info.index));
+                setAqiColor(tvAqi3, info.color, true);
+                tvAqi3.setTextColor(Color.WHITE);
+                tvAqi3.setShadowLayer(4, 0, 0, Color.BLACK);
+            } else {
+                tvAqi3.setText(String.valueOf(aqiValues[2]));
+                setAqiColor(tvAqi3, aqiValues[2], false);
+                tvAqi3.setTextColor(Color.WHITE);
+                tvAqi3.setShadowLayer(4, 0, 0, Color.BLACK);
+            }
         }
     }
 

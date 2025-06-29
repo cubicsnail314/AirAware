@@ -87,7 +87,14 @@ public class AqiCheckWorker extends Worker {
 
         // Get AQI threshold
         int aqiThreshold = prefs.getInt("aqi_threshold", 100);
-        Log.d(TAG, "AQI threshold: " + aqiThreshold);
+        int aqiThresholdOutside = prefs.getInt("aqi_threshold_outside", 0);
+        float lux = MyApplication.getLatestLux();
+        if (lux >= 5000 && aqiThresholdOutside > 0) {
+            aqiThreshold = aqiThresholdOutside;
+            Log.d(TAG, "Using outside threshold: " + aqiThreshold);
+        } else {
+            Log.d(TAG, "Using regular threshold: " + aqiThreshold);
+        }
 
         // Get AQI type (US or EU)
         String aqiType = prefs.getString("aqi_type", "us");

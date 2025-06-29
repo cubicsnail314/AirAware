@@ -1,4 +1,5 @@
 TODO
-- show city location consistently
-- run in background
+- 2 AQIs
+- barometer
+- sun detection
 - add ability to view on map (ambitious)

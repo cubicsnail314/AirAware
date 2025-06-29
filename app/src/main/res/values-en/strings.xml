@@ -90,4 +90,10 @@
     <string name="date_format_short">MM/dd</string>
     <string name="date_format_month_day">MMM dd</string>
     <string name="no_forecast">No forecast</string>
+    <string name="wien_index_1">very good</string>
+    <string name="wien_index_2">good</string>
+    <string name="wien_index_3">fair</string>
+    <string name="wien_index_4">poor</string>
+    <string name="wien_index_5">bad</string>
+    <string name="wien_index_6">very bad</string>
 </resources> 

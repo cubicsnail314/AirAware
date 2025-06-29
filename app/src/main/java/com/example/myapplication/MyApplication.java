@@ -11,6 +11,10 @@ import java.util.Locale;
 
 public class MyApplication extends Application {
     
+    private static float latestLux = 0;
+    public static float getLatestLux() { return latestLux; }
+    public static void setLatestLux(float lux) { latestLux = lux; }
+    
     @Override
     public void onCreate() {
         super.onCreate();

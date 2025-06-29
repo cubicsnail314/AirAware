@@ -20,10 +20,14 @@ public interface LocationDao {
 
     @Query("SELECT COUNT(*) FROM locations WHERE name = :name COLLATE NOCASE")
     int checkLocationExists(String name);
+
+    @Query("SELECT COUNT(*) FROM locations WHERE ABS(latitude - :lat) < :margin AND ABS(longitude - :lon) < :margin")
+    int checkLocationExistsByLatLon(double lat, double lon, double margin);
     
     @Transaction
     default boolean insertIfNotExists(LocationEntity location) {
-        int existingCount = checkLocationExists(location.name);
+        double margin = 0.001; // ~100 meters
+        int existingCount = checkLocationExistsByLatLon(location.latitude, location.longitude, margin);
         if (existingCount == 0) {
             insert(location);
             return true; // Successfully inserted

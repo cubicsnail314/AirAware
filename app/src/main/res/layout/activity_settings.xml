@@ -127,11 +127,32 @@
                     android:enabled="true"
                     android:maxLength="3" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:text="Threshold Outside"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp" />
+                <EditText
+                    android:id="@+id/edit_threshold_outside"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:gravity="center"
+                    android:background="@android:drawable/edit_text"
+                    android:enabled="true"
+                    android:maxLength="3" />
+            </LinearLayout>
             <TextView
                 android:id="@+id/description_threshold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/threshold_description"
+                android:text="at which air quality index a warning is sent&#10;Threshold Outside is active when sun is hitting the phone"
                 android:textSize="12sp"
                 android:textColor="#888"
                 android:layout_marginTop="4dp" />
