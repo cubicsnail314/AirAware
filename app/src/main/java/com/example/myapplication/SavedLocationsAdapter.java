@@ -1,17 +1,12 @@
 package com.example.myapplication;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,28 +43,24 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LocationEntity location = locations.get(position);
-        
-        holder.tvLocationName.setText(location.name);
-        
-        // Show loading state initially
-        holder.tvAqiNumber.setText("--");
-        
-        // Fetch AQI data for this location
+        holder.stationName.setText(location.name);
+        holder.city.setText(location.city);
+        holder.aqiNumber.setText("--");
         executorService.execute(() -> {
             try {
                 AirQualityResult result = AirQualityAPI.getAirQualityWithDetails(location.latitude, location.longitude);
                 holder.itemView.post(() -> {
                     if (result != null && result.aqi > 0) {
-                        holder.tvAqiNumber.setText(String.valueOf(result.aqi));
-                        setAqiColor(holder.tvAqiNumber, result.aqi);
-                        holder.tvAqiNumber.setShadowLayer(2, 0, 0, Color.BLACK);
+                        holder.aqiNumber.setText(String.valueOf(result.aqi));
+                        setAqiColor(holder.aqiNumber, result.aqi);
+                        holder.aqiNumber.setShadowLayer(2, 0, 0, Color.BLACK);
                     } else {
-                        holder.tvAqiNumber.setText("--");
+                        holder.aqiNumber.setText("--");
                     }
                 });
             } catch (Exception e) {
                 holder.itemView.post(() -> {
-                    holder.tvAqiNumber.setText("--");
+                    holder.aqiNumber.setText("--");
                 });
             }
         });
@@ -119,13 +110,14 @@ public class SavedLocationsAdapter extends RecyclerView.Adapter<SavedLocationsAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvLocationName, tvAqiNumber;
+        TextView stationName, aqiNumber, city;
         ImageButton btnDeleteLocation;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvLocationName = itemView.findViewById(R.id.tv_location_name);
-            tvAqiNumber = itemView.findViewById(R.id.tv_aqi_number);
+            city = itemView.findViewById(R.id.city_name);
+            stationName = itemView.findViewById(R.id.station_name);
+            aqiNumber = itemView.findViewById(R.id.aqi_number);
             btnDeleteLocation = itemView.findViewById(R.id.btn_delete_location);
         }
     }

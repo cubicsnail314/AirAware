@@ -10,19 +10,23 @@ public class LocationEntity {
     public int id;
 
     public String name;
+    public String city;
     public double longitude;
     public double latitude;
 
-    public LocationEntity(String name, double longitude, double latitude) {
+    public LocationEntity(String name, String city, double longitude, double latitude) {
         this.name = name;
+        this.city = city;
         this.longitude = longitude;
         this.latitude = latitude;
+
     }
 
     public static LocationEntity normalize(LocationEntity loc) {
         String normalizedName = loc.name.trim().toLowerCase();
+        String city = loc.city;
         double roundedLat = Math.round(loc.latitude * 10000.0) / 10000.0;
         double roundedLon = Math.round(loc.longitude * 10000.0) / 10000.0;
-        return new LocationEntity(normalizedName, roundedLon, roundedLat);
+        return new LocationEntity(normalizedName, city, roundedLon, roundedLat);
     }
 } 

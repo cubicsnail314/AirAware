@@ -100,7 +100,7 @@ public class SearchActivity extends AppCompatActivity {
                 // Add immediate feedback
                 Toast.makeText(SearchActivity.this, getString(R.string.checking_location), Toast.LENGTH_SHORT).show();
                 // Normalize and round before saving
-                LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude));
+                LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, "", searchResult.longitude, searchResult.latitude));
                 Log.d("SearchActivity", "[DEBUG] Saving location: name=" + location.name + ", lat=" + location.latitude + ", lon=" + location.longitude);
                 ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
                 dbExecutor.execute(() -> {

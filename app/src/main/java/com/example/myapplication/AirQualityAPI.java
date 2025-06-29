@@ -3,7 +3,6 @@ package com.example.myapplication;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -11,6 +10,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+
 
 public class AirQualityAPI {
     private static final String API_TOKEN = "a216862100a39d6530de9a623889e273588fab3f";
@@ -94,73 +95,10 @@ public class AirQualityAPI {
             JsonObject data = jobject.getAsJsonObject("data");
             int aqi = data.get("aqi").getAsInt();
 
-            // Get city information from the API's city object
-            String city = "Unknown";
-            String country = "Unknown";
-            String stationName = "Unknown";
-
-            JsonObject cityObj = data.getAsJsonObject("city");
-            if (cityObj != null) {
-                // Check if the API provides city name directly
-                if (cityObj.has("name")) {
-                    stationName = cityObj.get("name").getAsString();
-
-                    // Check if the name contains street-level information
-                    if (stationName.contains("gasse") || stationName.contains("straße") ||
-                            stationName.contains("street") || stationName.contains("avenue") ||
-                            stationName.contains("gegenüber") || stationName.contains("opposite")) {
-
-                        // Try to extract city from URL if available
-                        if (cityObj.has("url")) {
-                            String cityUrl = cityObj.get("url").getAsString();
-
-                            // URL format: https://aqicn.org/city/country/city/station
-                            String[] urlParts = cityUrl.split("/");
-                            if (urlParts.length >= 6) {
-                                // The structure is: https://aqicn.org/city/country/city/station
-                                String urlCountry = urlParts[4];
-                                String urlCity = urlParts[5];
-
-                                // Clean up the URL city name
-                                urlCity = urlCity.replace("--", " ").replace("-", " ");
-
-                                // Try to extract meaningful city name
-                                String[] words = urlCity.split(" ");
-                                for (String word : words) {
-                                    if (word.length() > 2 && !word.equals("gegenuber") &&
-                                            !word.equals("opposite") && !word.equals("near")) {
-                                        city = word.substring(0, 1).toUpperCase() +
-                                                word.substring(1).toLowerCase();
-                                        break;
-                                    }
-                                }
-
-                                country = urlCountry.substring(0, 1).toUpperCase() +
-                                        urlCountry.substring(1).toLowerCase();
-                            }
-                        }
-                    } else {
-                        // The name doesn't contain street terms, use normal parsing
-                        String[] parts = stationName.split(",");
-                        if (parts.length >= 2) {
-                            country = parts[parts.length - 1].trim();
-
-                            if (parts.length >= 3) {
-                                city = parts[parts.length - 2].trim();
-                            } else {
-                                city = parts[0].trim();
-                            }
-                        } else {
-                            city = stationName;
-                        }
-                    }
-                }
-
-                // Check if API provides country separately
-                if (cityObj.has("country")) {
-                    country = cityObj.get("country").getAsString();
-                }
-            }
+            JsonObject address = getAddressFromLatLon(lat,lon);
+            String city = address.get("city").getAsString();
+            String country = address.get("country").getAsString();
+            String stationName = data.get("city").getAsJsonObject().get("name").getAsString();
 
             // Extract forecast for next 3 days (pm10 AQI)
             String[] forecastDates = new String[3];
@@ -208,6 +146,31 @@ public class AirQualityAPI {
             e.printStackTrace();
             return new AirQualityResult(-1, "Error", "Error");
         }
+    }
+
+    public static JsonObject getAddressFromLatLon(Double lat, Double lon) throws Exception {
+        String urlString = String.format(Locale.US, "https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", lat, lon);
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        // Required User-Agent header for Nominatim
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Java App)");
+
+        // Read response
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        // Parse JSON response
+        JsonElement jelement = JsonParser.parseString(response.toString());
+        JsonObject jobject = jelement.getAsJsonObject();
+        return jobject.get("address").getAsJsonObject();
     }
 }
 
