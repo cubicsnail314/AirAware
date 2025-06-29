@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.gson.JsonObject;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -99,12 +101,18 @@ public class SearchActivity extends AppCompatActivity {
             holder.btnPlus.setOnClickListener(v -> {
                 // Add immediate feedback
                 Toast.makeText(SearchActivity.this, getString(R.string.checking_location), Toast.LENGTH_SHORT).show();
-                // Normalize and round before saving
-                LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, "", searchResult.longitude, searchResult.latitude));
-                Log.d("SearchActivity", "[DEBUG] Saving location: name=" + location.name + ", lat=" + location.latitude + ", lon=" + location.longitude);
                 ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
                 dbExecutor.execute(() -> {
                     try {
+                        String city = "";
+                        try {
+                            JsonObject address = AirQualityAPI.getAddressFromLatLon(searchResult.latitude, searchResult.longitude);
+                            city = address.get("city").getAsString();
+                        } catch(Exception e) {
+                            Log.d("SearchActivity", "failed to fetch city from latlon", e);
+                        }
+                        LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, city, searchResult.longitude, searchResult.latitude));
+                        Log.d("SearchActivity", "[DEBUG] Saving location: name=" + location.name + ", lat=" + location.latitude + ", lon=" + location.longitude);
                         // Use the transaction method to check and insert atomically
                         boolean wasInserted = DatabaseClient.getInstance(SearchActivity.this)
                                 .getAppDatabase()
