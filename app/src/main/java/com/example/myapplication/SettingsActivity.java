@@ -38,7 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Einstellungen");
+            getSupportActionBar().setTitle(getString(R.string.settings_title));
         }
 
         EditText editThreshold = findViewById(R.id.edit_threshold);
@@ -75,12 +75,12 @@ public class SettingsActivity extends AppCompatActivity {
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    Toast.makeText(this, "Benachrichtigungen aktiviert", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.notifications_enabled), Toast.LENGTH_SHORT).show();
                 } else {
                     // Permission denied, uncheck the switch
                     switchNotifications.setChecked(false);
                     prefs.edit().putBoolean(KEY_NOTIFICATIONS, false).apply();
-                    Toast.makeText(this, "Benachrichtigungen benötigen Erlaubnis", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.notifications_required), Toast.LENGTH_LONG).show();
                 }
             }
         );
@@ -126,9 +126,9 @@ public class SettingsActivity extends AppCompatActivity {
             
             // Show feedback
             if (isChecked) {
-                Toast.makeText(this, "Benachrichtigungen aktiviert", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.notifications_enabled), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Benachrichtigungen deaktiviert", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.notifications_disabled), Toast.LENGTH_SHORT).show();
             }
         });
     }

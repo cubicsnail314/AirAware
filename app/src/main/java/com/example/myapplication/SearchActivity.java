@@ -91,7 +91,7 @@ public class SearchActivity extends AppCompatActivity {
             // Add click listener for plus button to save station to database
             holder.btnPlus.setOnClickListener(v -> {
                 // Add immediate feedback
-                Toast.makeText(SearchActivity.this, "Checking location...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchActivity.this, getString(R.string.checking_location), Toast.LENGTH_SHORT).show();
                 // Normalize and round before saving
                 LocationEntity location = LocationEntity.normalize(new LocationEntity(searchResult.stationName, searchResult.longitude, searchResult.latitude));
                 Log.d("SearchActivity", "[DEBUG] Saving location: name=" + location.name + ", lat=" + location.latitude + ", lon=" + location.longitude);
@@ -106,14 +106,14 @@ public class SearchActivity extends AppCompatActivity {
                         
                         runOnUiThread(() -> {
                             if (wasInserted) {
-                                Toast.makeText(SearchActivity.this, "Location saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SearchActivity.this, getString(R.string.location_saved) + searchResult.stationName, Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(SearchActivity.this, "Location already saved: " + searchResult.stationName, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SearchActivity.this, getString(R.string.location_already_saved) + searchResult.stationName, Toast.LENGTH_SHORT).show();
                             }
                         });
                     } catch (Exception e) {
                         runOnUiThread(() -> {
-                            Toast.makeText(SearchActivity.this, "Error saving location", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SearchActivity.this, getString(R.string.error_saving_location), Toast.LENGTH_SHORT).show();
                         });
                     }
                 });
@@ -139,7 +139,7 @@ public class SearchActivity extends AppCompatActivity {
                             intent.putExtra("forecastAqi", airQualityResult.forecastAqi);
                             startActivity(intent);
                         } else {
-                            Toast.makeText(SearchActivity.this, "No air quality data available for this station", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SearchActivity.this, getString(R.string.no_air_quality_data_available_for_this_station), Toast.LENGTH_SHORT).show();
                         }
                     });
                 });

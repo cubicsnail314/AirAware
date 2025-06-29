@@ -45,7 +45,7 @@ public class NotificationActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            getSupportActionBar().setTitle("Benachrichtigungen");
+            getSupportActionBar().setTitle(getString(R.string.notifications));
         }
         
         // Initialize views
@@ -79,7 +79,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         if (notificationList.isEmpty()) {
             TextView emptyText = new TextView(this);
-            emptyText.setText("Keine Benachrichtigungen vorhanden");
+            emptyText.setText(getString(R.string.no_notifications_available));
             emptyText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             emptyText.setPadding(0, 100, 0, 0);
             notificationContainer.addView(emptyText);
@@ -142,14 +142,14 @@ public class NotificationActivity extends AppCompatActivity {
 
     private void clearAllNotifications() {
         new AlertDialog.Builder(this)
-            .setTitle("Benachrichtigungen löschen")
-            .setMessage("Möchten Sie wirklich alle Benachrichtigungen löschen?")
-            .setPositiveButton("Löschen", (dialog, which) -> {
+            .setTitle(getString(R.string.delete_notifications))
+            .setMessage(getString(R.string.are_you_sure_delete_all_notifications))
+            .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
                 notificationList.clear();
                 saveNotifications();
                 displayNotifications();
             })
-            .setNegativeButton("Abbrechen", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show();
     }
 

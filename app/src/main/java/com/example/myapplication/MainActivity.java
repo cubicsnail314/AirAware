@@ -61,11 +61,11 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    Toast.makeText(this, "Benachrichtigungen erlaubt!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.notifications_allowed), Toast.LENGTH_SHORT).show();
                     // Reschedule worker with new permission
                     rescheduleWorkerIfNeeded();
                 } else {
-                    Toast.makeText(this, "Benachrichtigungen benötigen Erlaubnis", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.notifications_require_permission), Toast.LENGTH_LONG).show();
                 }
             }
         );
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Error loading locations", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.error_loading_locations), Toast.LENGTH_SHORT).show();
                     // Show big buttons as fallback
                     recyclerViewLocations.setVisibility(View.GONE);
                     bigButtonsContainer.setVisibility(View.VISIBLE);
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                     .deleteLocation(location);
 
             runOnUiThread(() -> {
-                Toast.makeText(this, "Standort gelöscht", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.location_deleted), Toast.LENGTH_SHORT).show();
                 loadSavedLocations(); // Reload the list
             });
         });
@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                 getNearestLocation();
             } else {
                 // Permission denied, show a message to the user
-                Toast.makeText(this, "GPS permission is required to add the nearest location.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.gps_permission_required_to_add_nearest_location), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -336,21 +336,21 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         // Check permission before accessing location services
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Location permission not granted", Toast.LENGTH_SHORT).show());
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, getString(R.string.location_permission_not_granted), Toast.LENGTH_SHORT).show());
             return;
         }
         
         // Try network location first (faster), then GPS
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             System.out.println("Trying Network provider for faster location...");
-            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Getting network location...", Toast.LENGTH_SHORT).show());
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, getString(R.string.getting_network_location), Toast.LENGTH_SHORT).show());
             requestLocation(locationManager, LocationManager.NETWORK_PROVIDER);
         } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             System.out.println("Trying GPS provider...");
-            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Getting GPS location...", Toast.LENGTH_SHORT).show());
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, getString(R.string.getting_gps_location), Toast.LENGTH_SHORT).show());
             requestLocation(locationManager, LocationManager.GPS_PROVIDER);
         } else {
-            runOnUiThread(() -> Toast.makeText(MainActivity.this, "No location providers available", Toast.LENGTH_SHORT).show());
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, getString(R.string.no_location_providers_available), Toast.LENGTH_SHORT).show());
         }
     }
     
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         // Check permission before requesting location updates
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.location_permission_not_granted), Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -372,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, getString(R.string.lat) + ": " + latitude + ", " + getString(R.string.lon) + ": " + longitude, Toast.LENGTH_LONG).show();
                         }
                     });
                     getAirQualityForNearestLocation(latitude, longitude);
@@ -393,14 +393,14 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "Location provider disabled", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, getString(R.string.location_provider_disabled), Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
             }, Looper.getMainLooper());
         } catch (SecurityException e) {
             System.out.println("SecurityException when requesting location: " + e.getMessage());
-            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -441,16 +441,16 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
                     != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Benachrichtigungen benötigen Erlaubnis. Wird angefordert...", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.notifications_require_permission_to_test), Toast.LENGTH_LONG).show();
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
                 return;
             }
         }
         
         // Send simple test notification
-        NotificationActivity.addNotification(this, "Test notification", "Test notification");
+        NotificationActivity.addNotification(this, getString(R.string.test_notification), getString(R.string.test_notification));
         
-        Toast.makeText(this, "Test notification sent!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.test_notification_sent), Toast.LENGTH_SHORT).show();
         Log.d("MainActivity", "Test notification sent");
     }
 }
