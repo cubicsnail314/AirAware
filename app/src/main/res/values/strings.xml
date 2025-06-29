@@ -79,4 +79,14 @@
         <string name="aqi_notifications_channel_desc">Notifications for high AQI levels</string>
         <string name="test_notification">Test notification</string>
         <string name="benachrichtigungen_erlaubt">Benachrichtigungen erlaubt!</string>
+        <string name="delete_all_notifications">Alle löschen</string>
+        <string name="aqi_good">Gut</string>
+        <string name="aqi_moderate">Mäßig</string>
+        <string name="aqi_unhealthy_sensitive">Ungesund für empfindliche Gruppen</string>
+        <string name="aqi_unhealthy">Ungesund</string>
+        <string name="aqi_very_unhealthy">Sehr ungesund</string>
+        <string name="aqi_hazardous">Gefährlich</string>
+        <string name="date_format_short">dd.MM</string>
+        <string name="date_format_month_day">MMM dd</string>
+        <string name="no_forecast">Keine Prognose</string>
     </resources>

@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -23,11 +24,18 @@ import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import android.content.SharedPreferences;
 
 public class ActiveLocationActivity extends AppCompatActivity {
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_nearest_location_result);
 
         // Set up toolbar with back button
@@ -60,7 +68,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
         String cleanStationName = stationName;
 
-        tvStation.setText("Station: " + cleanStationName);
+        tvStation.setText(getString(R.string.station) + " " + cleanStationName);
         tvAqi.setText(String.valueOf(aqi));
         tvAqiDescription.setText(getAqiDescription(aqi));
         tvAqi.setShadowLayer(4, 0, 0, Color.BLACK);
@@ -157,21 +165,33 @@ public class ActiveLocationActivity extends AppCompatActivity {
         TextView tvAqi2 = findViewById(R.id.tv_forecast_aqi2);
         TextView tvAqi3 = findViewById(R.id.tv_forecast_aqi3);
 
-        if (dates.length > 0 && aqiValues.length > 0) {
+        // If fewer than 3 valid dates, show 'No forecast' in all fields
+        if (dates.length < 3 || dates[0] == null || dates[1] == null || dates[2] == null) {
+            String noForecast = getString(R.string.no_forecast);
+            tvDate1.setText(noForecast);
+            tvDate2.setText(noForecast);
+            tvDate3.setText(noForecast);
+            tvAqi1.setText("");
+            tvAqi2.setText("");
+            tvAqi3.setText("");
+            return;
+        }
+
+        if (dates.length > 0 && aqiValues.length > 0 && dates[0] != null) {
             tvDate1.setText(formatDate(dates[0]));
             tvAqi1.setText(String.valueOf(aqiValues[0]));
             setAqiColor(tvAqi1, aqiValues[0]);
             tvAqi1.setShadowLayer(4, 0, 0, Color.BLACK);
         }
 
-        if (dates.length > 1 && aqiValues.length > 1) {
+        if (dates.length > 1 && aqiValues.length > 1 && dates[1] != null) {
             tvDate2.setText(formatDate(dates[1]));
             tvAqi2.setText(String.valueOf(aqiValues[1]));
             setAqiColor(tvAqi2, aqiValues[1]);
             tvAqi2.setShadowLayer(4, 0, 0, Color.BLACK);
         }
 
-        if (dates.length > 2 && aqiValues.length > 2) {
+        if (dates.length > 2 && aqiValues.length > 2 && dates[2] != null) {
             tvDate3.setText(formatDate(dates[2]));
             tvAqi3.setText(String.valueOf(aqiValues[2]));
             setAqiColor(tvAqi3, aqiValues[2]);
@@ -181,8 +201,14 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
     private String formatDate(String dateStr) {
         try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
+            // Get the app's language setting
+            SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+            String language = prefs.getString("language", "de");
+            Locale appLocale = new Locale(language);
+            
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd", appLocale);
+            
             Date date = inputFormat.parse(dateStr);
             return outputFormat.format(date);
         } catch (Exception e) {
@@ -192,17 +218,17 @@ public class ActiveLocationActivity extends AppCompatActivity {
 
     private String getAqiDescription(int aqi) {
         if (aqi <= 50) {
-            return "Good";
+            return getString(R.string.aqi_good);
         } else if (aqi <= 100) {
-            return "Moderate";
+            return getString(R.string.aqi_moderate);
         } else if (aqi <= 150) {
-            return "Unhealthy for Sensitive Groups";
+            return getString(R.string.aqi_unhealthy_sensitive);
         } else if (aqi <= 200) {
-            return "Unhealthy";
+            return getString(R.string.aqi_unhealthy);
         } else if (aqi <= 300) {
-            return "Very Unhealthy";
+            return getString(R.string.aqi_very_unhealthy);
         } else {
-            return "Hazardous";
+            return getString(R.string.aqi_hazardous);
         }
     }
 

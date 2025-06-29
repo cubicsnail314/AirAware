@@ -30,8 +30,14 @@ public class NotificationActivity extends AppCompatActivity {
     private Gson gson;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_notifications);
 
         // Initialize Gson for JSON serialization
@@ -141,16 +147,9 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
     private void clearAllNotifications() {
-        new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.delete_notifications))
-            .setMessage(getString(R.string.are_you_sure_delete_all_notifications))
-            .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
-                notificationList.clear();
-                saveNotifications();
-                displayNotifications();
-            })
-            .setNegativeButton(getString(R.string.cancel), null)
-            .show();
+        notificationList.clear();
+        saveNotifications();
+        displayNotifications();
     }
 
     private void saveNotifications() {

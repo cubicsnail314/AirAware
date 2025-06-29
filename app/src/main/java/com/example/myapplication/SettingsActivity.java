@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -19,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import android.content.Context;
 
 public class SettingsActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "settings";
@@ -30,8 +32,14 @@ public class SettingsActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_settings);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -100,6 +108,10 @@ public class SettingsActivity extends AppCompatActivity {
         radioLanguage.setOnCheckedChangeListener((group, checkedId) -> {
             String lang = (checkedId == R.id.radio_de) ? "de" : "en";
             prefs.edit().putString(KEY_LANGUAGE, lang).apply();
+            // Update the current activity's language without restarting
+            MyApplication.updateLanguage(this);
+            // Recreate the activity to apply language changes
+            recreate();
         });
 
         // Save AQI type on change

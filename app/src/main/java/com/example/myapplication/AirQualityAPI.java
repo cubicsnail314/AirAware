@@ -87,9 +87,6 @@ public class AirQualityAPI {
             JsonElement jelement = JsonParser.parseString(content.toString());
             JsonObject jobject = jelement.getAsJsonObject();
 
-            // Debug: Print the API response
-            System.out.println("API Response: " + content.toString());
-
             if (!"ok".equals(jobject.get("status").getAsString())) {
                 return new AirQualityResult(-1, "Unknown", "Unknown");
             }
@@ -104,30 +101,18 @@ public class AirQualityAPI {
 
             JsonObject cityObj = data.getAsJsonObject("city");
             if (cityObj != null) {
-                // Debug: Print the entire city object to see its structure
-                System.out.println("City object: " + cityObj.toString());
-
-                // Check all available fields in the city object
-                for (String key : cityObj.keySet()) {
-                    System.out.println("City field '" + key + "': " + cityObj.get(key));
-                }
-
                 // Check if the API provides city name directly
                 if (cityObj.has("name")) {
                     stationName = cityObj.get("name").getAsString();
-                    System.out.println("Full city name from API: " + stationName);
 
                     // Check if the name contains street-level information
                     if (stationName.contains("gasse") || stationName.contains("straße") ||
                             stationName.contains("street") || stationName.contains("avenue") ||
                             stationName.contains("gegenüber") || stationName.contains("opposite")) {
 
-                        System.out.println("Detected street-level information, checking URL...");
-
                         // Try to extract city from URL if available
                         if (cityObj.has("url")) {
                             String cityUrl = cityObj.get("url").getAsString();
-                            System.out.println("City URL: " + cityUrl);
 
                             // URL format: https://aqicn.org/city/country/city/station
                             String[] urlParts = cityUrl.split("/");
@@ -135,9 +120,6 @@ public class AirQualityAPI {
                                 // The structure is: https://aqicn.org/city/country/city/station
                                 String urlCountry = urlParts[4];
                                 String urlCity = urlParts[5];
-
-                                System.out.println("URL Country: " + urlCountry);
-                                System.out.println("URL City: " + urlCity);
 
                                 // Clean up the URL city name
                                 urlCity = urlCity.replace("--", " ").replace("-", " ");
@@ -158,7 +140,6 @@ public class AirQualityAPI {
                             }
                         }
                     } else {
-                        System.out.println("No street-level information detected, using normal parsing");
                         // The name doesn't contain street terms, use normal parsing
                         String[] parts = stationName.split(",");
                         if (parts.length >= 2) {
@@ -181,18 +162,6 @@ public class AirQualityAPI {
                 }
             }
 
-            // Also check if there are other location fields in the main data object
-            System.out.println("Checking for other location fields in data object:");
-            for (String key : data.keySet()) {
-                if (key.toLowerCase().contains("city") || key.toLowerCase().contains("location") ||
-                        key.toLowerCase().contains("place") || key.toLowerCase().contains("name")) {
-                    System.out.println("Location-related field '" + key + "': " + data.get(key));
-                }
-            }
-
-            System.out.println("Extracted city: " + city);
-            System.out.println("Extracted country: " + country);
-
             // Extract forecast for next 3 days (pm10 AQI)
             String[] forecastDates = new String[3];
             int[] forecastAqi = new int[3];
@@ -201,25 +170,33 @@ public class AirQualityAPI {
                 if (forecast.has("daily")) {
                     JsonObject daily = forecast.getAsJsonObject("daily");
                     if (daily.has("pm10")) {
-                        // Get today's date to filter out today from forecast
+                        // Get today's date
                         Calendar today = Calendar.getInstance();
-                        String todayStr = String.format("%04d-%02d-%02d",
-                                today.get(Calendar.YEAR),
-                                today.get(Calendar.MONTH) + 1,
-                                today.get(Calendar.DAY_OF_MONTH));
+                        today.set(Calendar.HOUR_OF_DAY, 0);
+                        today.set(Calendar.MINUTE, 0);
+                        today.set(Calendar.SECOND, 0);
+                        today.set(Calendar.MILLISECOND, 0);
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                        String todayStr = sdf.format(today.getTime());
 
-                        int i = 0;
+                        // Collect all future dates
+                        java.util.List<String> futureDates = new java.util.ArrayList<>();
+                        java.util.Map<String, Integer> dateToAqi = new java.util.HashMap<>();
                         for (JsonElement elem : daily.getAsJsonArray("pm10")) {
-                            if (i >= 3) break;
                             JsonObject day = elem.getAsJsonObject();
                             String forecastDate = day.get("day").getAsString();
-
-                            // Skip today's date and only include future dates
-                            if (!forecastDate.equals(todayStr)) {
-                                forecastDates[i] = forecastDate;
-                                forecastAqi[i] = day.get("avg").getAsInt();
-                                i++;
+                            int avgAqi = day.get("avg").getAsInt();
+                            if (forecastDate.compareTo(todayStr) > 0) { // strictly after today
+                                futureDates.add(forecastDate);
+                                dateToAqi.put(forecastDate, avgAqi);
                             }
+                        }
+                        // Sort the dates
+                        java.util.Collections.sort(futureDates);
+                        // Take the next three
+                        for (int i = 0; i < 3 && i < futureDates.size(); i++) {
+                            forecastDates[i] = futureDates.get(i);
+                            forecastAqi[i] = dateToAqi.get(futureDates.get(i));
                         }
                     }
                 }
@@ -233,3 +210,5 @@ public class AirQualityAPI {
         }
     }
 }
+
+

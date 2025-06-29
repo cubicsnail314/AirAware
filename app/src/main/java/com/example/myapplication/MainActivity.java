@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.util.Log;
+import android.content.Context;
 
 public class MainActivity extends AppCompatActivity implements SavedLocationsAdapter.OnLocationClickListener {
 
@@ -50,8 +51,14 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_main);
 
         executorService = Executors.newSingleThreadExecutor();
@@ -74,27 +81,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         boolean notificationsEnabled = prefs.getBoolean("notifications_enabled", false);
         if (notificationsEnabled) {
-            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        Data inputData = new Data.Builder()
-                            .putDouble("latitude", location.getLatitude())
-                            .putDouble("longitude", location.getLongitude())
-                            .build();
-
-                        PeriodicWorkRequest aqiCheckRequest =
-                            new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 30, TimeUnit.MINUTES)
-                                .setInputData(inputData)
-                                .build();
-
-                        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                            "aqi_check",
-                            ExistingPeriodicWorkPolicy.REPLACE,
-                            aqiCheckRequest
-                        );
-                    }
-                });
+            scheduleAqiWorkerWithPermissionCheck();
         }
 
         // Initialize views
@@ -199,35 +186,43 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
             // Cancel existing work first
             WorkManager.getInstance(this).cancelUniqueWork("aqi_check");
             
-            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        Data inputData = new Data.Builder()
-                            .putDouble("latitude", location.getLatitude())
-                            .putDouble("longitude", location.getLongitude())
-                            .build();
-
-                        // Use shorter interval for testing (5 minutes instead of 30)
-                        PeriodicWorkRequest aqiCheckRequest =
-                            new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 5, TimeUnit.MINUTES)
-                                .setInputData(inputData)
+            // Check if location permission is granted
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted, safe to access location
+                FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            Data inputData = new Data.Builder()
+                                .putDouble("latitude", location.getLatitude())
+                                .putDouble("longitude", location.getLongitude())
                                 .build();
 
-                        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                            "aqi_check",
-                            ExistingPeriodicWorkPolicy.REPLACE,
-                            aqiCheckRequest
-                        );
-                        
-                        Log.d("MainActivity", "Worker scheduled with location: " + location.getLatitude() + ", " + location.getLongitude());
-                    } else {
-                        Log.e("MainActivity", "No location available for worker");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("MainActivity", "Failed to get location for worker", e);
-                });
+                            // Use shorter interval for testing (5 minutes instead of 30)
+                            PeriodicWorkRequest aqiCheckRequest =
+                                new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 5, TimeUnit.MINUTES)
+                                    .setInputData(inputData)
+                                    .build();
+
+                            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                                "aqi_check",
+                                ExistingPeriodicWorkPolicy.REPLACE,
+                                aqiCheckRequest
+                            );
+                            
+                            Log.d("MainActivity", "Worker scheduled with location: " + location.getLatitude() + ", " + location.getLongitude());
+                        } else {
+                            Log.e("MainActivity", "No location available for worker");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("MainActivity", "Failed to get location for worker", e);
+                    });
+            } else {
+                // Permission is not granted, log this but don't crash
+                Log.w("MainActivity", "Location permission not granted, cannot schedule AQI worker");
+            }
         } else {
             // Cancel worker if notifications are disabled
             WorkManager.getInstance(this).cancelUniqueWork("aqi_check");
@@ -452,5 +447,41 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         
         Toast.makeText(this, getString(R.string.test_notification_sent), Toast.LENGTH_SHORT).show();
         Log.d("MainActivity", "Test notification sent");
+    }
+
+    private void scheduleAqiWorkerWithPermissionCheck() {
+        // Check if location permission is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Permission is granted, safe to access location
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        Data inputData = new Data.Builder()
+                            .putDouble("latitude", location.getLatitude())
+                            .putDouble("longitude", location.getLongitude())
+                            .build();
+
+                        PeriodicWorkRequest aqiCheckRequest =
+                            new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 30, TimeUnit.MINUTES)
+                                .setInputData(inputData)
+                                .build();
+
+                        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                            "aqi_check",
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            aqiCheckRequest
+                        );
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure, e.g., log or show a message
+                    Log.e("MainActivity", "Failed to get location for AQI worker", e);
+                });
+        } else {
+            // Permission is not granted, log this but don't crash
+            Log.w("MainActivity", "Location permission not granted, cannot schedule AQI worker");
+        }
     }
 }

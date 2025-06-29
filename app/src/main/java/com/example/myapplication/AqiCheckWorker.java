@@ -29,6 +29,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Tasks;
+import com.google.android.gms.location.Priority;
+
 public class AqiCheckWorker extends Worker {
     private static final String TAG = "AqiCheckWorker";
     private static final String CHANNEL_ID = "aqi_notifications";
@@ -46,16 +51,28 @@ public class AqiCheckWorker extends Worker {
     public Result doWork() {
         Log.d(TAG, "Starting AQI check worker");
 
-        // Get location from input data
-        double latitude = getInputData().getDouble("latitude", 0.0);
-        double longitude = getInputData().getDouble("longitude", 0.0);
+        // Get fresh location using FusedLocationProviderClient
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+        double latitude = 0.0;
+        double longitude = 0.0;
+        try {
+            Location location = Tasks.await(
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null),
+                10, TimeUnit.SECONDS
+            );
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            } else {
+                Log.e(TAG, "No valid location provided");
+                return Result.retry();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get location", e);
+            return Result.retry();
+        }
 
         Log.d(TAG, "Worker location: " + latitude + ", " + longitude);
-
-        if (latitude == 0.0 && longitude == 0.0) {
-            Log.e(TAG, "No valid location provided");
-            return Result.failure();
-        }
 
         // Check if notifications are enabled
         SharedPreferences prefs = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);

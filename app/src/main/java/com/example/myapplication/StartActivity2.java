@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,8 +12,14 @@ public class StartActivity2 extends AppCompatActivity {
     private static final String KEY_FIRST_RUN = "first_run";
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_start_2);
 
         // “Nicht jetzt” → MainActivity AND mark first_run = false

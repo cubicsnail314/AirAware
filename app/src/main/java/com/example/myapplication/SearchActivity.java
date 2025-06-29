@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.MotionEvent;
@@ -26,8 +27,14 @@ public class SearchActivity extends AppCompatActivity {
     private ArrayList<StationSearchResult> searchResults = new ArrayList<>();
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyApplication.updateLanguageContext(newBase));
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MyApplication.updateLanguage(this);
         setContentView(R.layout.activity_search);
 
         // 1) Set up our custom Toolbar
