@@ -23,7 +23,7 @@
             android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/aqi_number"
+                android:id="@+id/tv_aqi_number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="--"
@@ -36,35 +36,16 @@
                 android:gravity="center"
                 android:layout_marginEnd="12dp" />
 
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tv_location_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/city_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:maxLines="2"
-                    android:textColor="@android:color/black"
-                    android:ellipsize="end"
-                    android:layout_marginStart="8dp" />
-                <TextView
-                    android:id="@+id/station_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/location_name"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:maxLines="2"
-                    android:ellipsize="end" />
-
-            </LinearLayout>
+                android:text="@string/location_name"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:maxLines="2"
+                android:ellipsize="end" />
 
         </LinearLayout>
 
@@ -87,4 +68,4 @@
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</androidx.cardview.widget.CardView> 

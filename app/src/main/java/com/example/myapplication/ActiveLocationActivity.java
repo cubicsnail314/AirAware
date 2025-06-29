@@ -5,13 +5,21 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.content.ContextCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import androidx.work.Data;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import java.util.concurrent.TimeUnit;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,7 +47,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        TextView tvCity = findViewById(R.id.city_name);
+        TextView tvCity = findViewById(R.id.tv_city);
         TextView tvCountry = findViewById(R.id.tv_country);
         TextView tvStation = findViewById(R.id.tv_station);
         TextView tvAqi = findViewById(R.id.tv_aqi);
@@ -77,7 +85,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
         }
 
         // Normalize location entity for DB operations
-        LocationEntity normalizedLoc = LocationEntity.normalize(new LocationEntity(stationName, city, longitude, latitude));
+        LocationEntity normalizedLoc = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
         // Hide plus button if location is already saved
         MaterialButton btnPlus = findViewById(R.id.btn_plus);
         new Thread(() -> {
@@ -100,7 +108,7 @@ public class ActiveLocationActivity extends AppCompatActivity {
             android.widget.Toast.makeText(ActiveLocationActivity.this, "Checking location...", android.widget.Toast.LENGTH_SHORT).show();
             
             // Save current station to database
-            LocationEntity location = LocationEntity.normalize(new LocationEntity(stationName, city, longitude, latitude));
+            LocationEntity location = LocationEntity.normalize(new LocationEntity(stationName, longitude, latitude));
             new Thread(() -> {
                 try {
                     // Use the transaction method to check and insert atomically
