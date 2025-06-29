@@ -22,7 +22,7 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Luftqualität in der Nähe ermitteln"
+        android:text="@string/luftqualitaet_nahe"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/iv_graphic"
@@ -35,7 +35,7 @@
         android:id="@+id/tv_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Erlauben Sie der App, auf den Standort Ihres Gerätes zuzugreifen, um Informationen zur Luftqualität und zum Wetter in Ihrer Umgebung abzurufen."
+        android:text="@string/standort_beschreibung"
         android:textSize="14sp"
         android:gravity="center"
         android:padding="16dp"
@@ -43,12 +43,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Primary button (just example—you’ll hook up its click yourself) -->
+    <!-- Primary button (just example—you'll hook up its click yourself) -->
     <Button
         android:id="@+id/btn_allow_location"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Meine Stadt orten"
+        android:text="@string/meine_stadt_orten"
         app:layout_constraintBottom_toTopOf="@id/btn_skip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,7 +59,7 @@
         android:id="@+id/btn_skip"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Nicht jetzt"
+        android:text="@string/nicht_jetzt"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

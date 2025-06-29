@@ -26,7 +26,7 @@
 
             <!-- App Sprache -->
             <TextView
-                android:text="App Sprache"
+                android:text="@string/app_sprache"
                 android:textStyle="bold"
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
@@ -42,12 +42,12 @@
                     android:id="@+id/radio_de"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Deutsch" />
+                    android:text="@string/deutsch" />
                 <RadioButton
                     android:id="@+id/radio_en"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Englisch"
+                    android:text="@string/englisch"
                     android:layout_marginStart="24dp" />
             </RadioGroup>
 
@@ -55,7 +55,7 @@
 
             <!-- Luftqualität Index -->
             <TextView
-                android:text="Luftqualität Index"
+                android:text="@string/luftqualitaet_index"
                 android:textStyle="bold"
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
@@ -71,12 +71,12 @@
                     android:id="@+id/radio_aqi_usa"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="AQI (USA)" />
+                    android:text="@string/aqi_usa" />
                 <RadioButton
                     android:id="@+id/radio_aqi_wien"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Wiener Luftgüteindex"
+                    android:text="@string/wiener_luftgueteindex"
                     android:layout_marginStart="24dp" />
             </RadioGroup>
 
@@ -84,7 +84,7 @@
 
             <!-- Benachrichtigungen -->
             <TextView
-                android:text="Benachrichtigungen"
+                android:text="@string/benachrichtigungen"
                 android:textStyle="bold"
                 android:textColor="#2196F3"
                 android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
                 <TextView
-                    android:text="Aktivieren"
+                    android:text="@string/aktivieren"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp" />
@@ -113,24 +113,25 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="8dp">
                 <TextView
-                    android:text="Grenzwert"
+                    android:text="@string/grenzwert"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp" />
                 <EditText
                     android:id="@+id/edit_threshold"
-                    android:layout_width="0dp"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:inputType="number"
-                    android:hint="z.B. 100"
-                    android:enabled="false" />
+                    android:gravity="center"
+                    android:background="@android:drawable/edit_text"
+                    android:enabled="true"
+                    android:maxLength="3" />
             </LinearLayout>
             <TextView
                 android:id="@+id/description_threshold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ab welchem Luftqualitäts Index eine Warnung gesendet wird"
+                android:text="@string/threshold_description"
                 android:textSize="12sp"
                 android:textColor="#888"
                 android:layout_marginTop="4dp" />

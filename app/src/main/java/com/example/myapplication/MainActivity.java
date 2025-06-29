@@ -20,10 +20,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.Color;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import androidx.work.Data;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import com.example.myapplication.AqiCheckWorker;
+import android.content.SharedPreferences;
+import java.util.concurrent.TimeUnit;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity implements SavedLocationsAdapter.OnLocationClickListener {
 
@@ -35,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     private View bigButtonsContainer;
     private SavedLocationsAdapter adapter;
     private ExecutorService executorService;
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +55,47 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         setContentView(R.layout.activity_main);
 
         executorService = Executors.newSingleThreadExecutor();
+
+        // Initialize permission launcher
+        notificationPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (isGranted) {
+                    Toast.makeText(this, "Benachrichtigungen erlaubt!", Toast.LENGTH_SHORT).show();
+                    // Reschedule worker with new permission
+                    rescheduleWorkerIfNeeded();
+                } else {
+                    Toast.makeText(this, "Benachrichtigungen benötigen Erlaubnis", Toast.LENGTH_LONG).show();
+                }
+            }
+        );
+
+        // Schedule AQI background worker if notifications are enabled
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean notificationsEnabled = prefs.getBoolean("notifications_enabled", false);
+        if (notificationsEnabled) {
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        Data inputData = new Data.Builder()
+                            .putDouble("latitude", location.getLatitude())
+                            .putDouble("longitude", location.getLongitude())
+                            .build();
+
+                        PeriodicWorkRequest aqiCheckRequest =
+                            new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 30, TimeUnit.MINUTES)
+                                .setInputData(inputData)
+                                .build();
+
+                        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                            "aqi_check",
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            aqiCheckRequest
+                        );
+                    }
+                });
+        }
 
         // Initialize views
         initializeViews();
@@ -72,8 +126,16 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         btnAddLocation.setOnClickListener(v -> startActivity(Search));
 
         btnNotifications.setOnClickListener(v -> {
-            // TODO: Benachrichtigungen anzeigen
+            Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
+            startActivity(intent);
         });
+        
+        // Add long press on notifications button to test notifications
+        btnNotifications.setOnLongClickListener(v -> {
+            testNotification();
+            return true;
+        });
+
         btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
@@ -124,6 +186,53 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
         super.onResume();
         // Reload locations when returning to the activity
         loadSavedLocations();
+        
+        // Reschedule worker if settings changed
+        rescheduleWorkerIfNeeded();
+    }
+    
+    private void rescheduleWorkerIfNeeded() {
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean notificationsEnabled = prefs.getBoolean("notifications_enabled", false);
+        
+        if (notificationsEnabled) {
+            // Cancel existing work first
+            WorkManager.getInstance(this).cancelUniqueWork("aqi_check");
+            
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        Data inputData = new Data.Builder()
+                            .putDouble("latitude", location.getLatitude())
+                            .putDouble("longitude", location.getLongitude())
+                            .build();
+
+                        // Use shorter interval for testing (5 minutes instead of 30)
+                        PeriodicWorkRequest aqiCheckRequest =
+                            new PeriodicWorkRequest.Builder(AqiCheckWorker.class, 5, TimeUnit.MINUTES)
+                                .setInputData(inputData)
+                                .build();
+
+                        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                            "aqi_check",
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            aqiCheckRequest
+                        );
+                        
+                        Log.d("MainActivity", "Worker scheduled with location: " + location.getLatitude() + ", " + location.getLongitude());
+                    } else {
+                        Log.e("MainActivity", "No location available for worker");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("MainActivity", "Failed to get location for worker", e);
+                });
+        } else {
+            // Cancel worker if notifications are disabled
+            WorkManager.getInstance(this).cancelUniqueWork("aqi_check");
+            Log.d("MainActivity", "Worker cancelled - notifications disabled");
+        }
     }
 
     @Override
@@ -304,24 +413,44 @@ public class MainActivity extends AppCompatActivity implements SavedLocationsAda
     }
 
     private void setAqiColor(Button button, int aqi) {
-        int color;
+        GradientDrawable gradient = new GradientDrawable();
+        gradient.setShape(GradientDrawable.RECTANGLE);
+        gradient.setCornerRadius(16);
+
         if (aqi <= 50) {
-            color = Color.parseColor("#4CAF50"); // Green
+            gradient.setColor(Color.parseColor("#00E400")); // Green
         } else if (aqi <= 100) {
-            color = Color.parseColor("#FFEB3B"); // Yellow
+            gradient.setColor(Color.parseColor("#FFFF00")); // Yellow
         } else if (aqi <= 150) {
-            color = Color.parseColor("#FF9800"); // Orange
+            gradient.setColor(Color.parseColor("#FF7E00")); // Orange
         } else if (aqi <= 200) {
-            color = Color.parseColor("#F44336"); // Red
+            gradient.setColor(Color.parseColor("#FF0000")); // Red
         } else if (aqi <= 300) {
-            color = Color.parseColor("#9C27B0"); // Purple
+            gradient.setColor(Color.parseColor("#8F3F97")); // Purple
         } else {
-            color = Color.parseColor("#8D6E63"); // Maroon
+            gradient.setColor(Color.parseColor("#7E0023")); // Maroon
         }
-        GradientDrawable background = new GradientDrawable();
-        background.setShape(GradientDrawable.RECTANGLE);
-        background.setCornerRadius(16);
-        background.setColor(color);
-        button.setBackground(background);
+
+        button.setBackground(gradient);
+    }
+    
+    private void testNotification() {
+        Log.d("MainActivity", "Testing notification...");
+        
+        // Check if we have notification permission (Android 13+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Benachrichtigungen benötigen Erlaubnis. Wird angefordert...", Toast.LENGTH_LONG).show();
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                return;
+            }
+        }
+        
+        // Send simple test notification
+        NotificationActivity.addNotification(this, "Test notification", "Test notification");
+        
+        Toast.makeText(this, "Test notification sent!", Toast.LENGTH_SHORT).show();
+        Log.d("MainActivity", "Test notification sent");
     }
 }
